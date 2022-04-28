@@ -1,0 +1,6 @@
+.dependencygraph
+.vscode
+bin
+obj
+Properties
+*.csproj
