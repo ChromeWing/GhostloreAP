@@ -95,6 +95,9 @@ namespace GhostloreAP
             GLAPModLoader.DebugShowMessage("In OnKillQuestCompleted");
             if(locations.Count == 0) { return; }
             GLAPModLoader.DebugShowMessage("about to drop items in OnKillQuestCompleted");
+            GLAPNotification.instance.DisplayMessage(String.Format("You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
+            GLAPNotification.instance.DisplayMessage(String.Format("#2test You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
+            GLAPNotification.instance.DisplayMessage(String.Format("#3test You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
             GLAPItemGiver.instance.DropItemsFrom(locations[0].creature, locations[0].count,MinLevel,MaxLevel);
             locations.RemoveAt(0);
             locationsCleared++;

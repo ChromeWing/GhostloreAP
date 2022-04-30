@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using HarmonyLib;
+using System.IO;
 
 /* TODO:
  * postfix NPCTrader.CheckInventory() to setup the archipelago itemshop.
@@ -29,6 +30,7 @@ namespace GhostloreAP
 
         private List<IGLAPSingleton> singletons;
 
+        private static string DebugHierarchyPath = Path.Combine(LoadingManager.PersistantDataPath, "debug-hierarchy.txt");
 
         public void OnCreated()
         {
@@ -50,13 +52,14 @@ namespace GhostloreAP
             ExtendedBindingManager.EnsureExists();
             GLAPLocationManager.EnsureExists();
             GLAPItemGiver.EnsureExists();
-
+            GLAPNotification.EnsureExists();
 
             singletons.Add(ExtendedBindingManager.instance);
             singletons.Add(GLAPLocationManager.instance);
             singletons.Add(GLAPItemGiver.instance);
             singletons.Add(QuestFactory.instance);
             singletons.Add(CreatureCatalogLogger.instance);
+            singletons.Add(GLAPNotification.instance);
         }
 
         private void DisposeSingletons()
@@ -73,6 +76,7 @@ namespace GhostloreAP
         {
             active = true;
             GLAPLocationManager.instance.StartListeners();
+            GLAPNotification.instance.Init();
             WelcomePlayer();
             
         }
@@ -124,12 +128,52 @@ namespace GhostloreAP
                 await Task.Yield();
             }
             await Task.Delay(500);
-            //DebugShowMessage("Welcome!");
+            GLAPNotification.instance.DisplayMessage("Welcome!");
+            GLAPNotification.instance.DisplayMessage("Welcome! x2");
+            GLAPNotification.instance.DisplayMessage("Welcome! x3");
 
 
 
         }
 
-        
+
+        public static void ReportHierarchy()
+        {
+            File.WriteAllText(DebugHierarchyPath, DebugRoot());
+        }
+
+        static string DebugRoot()
+        {
+            string result = "----- Debug root -----\n";
+            foreach (GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)))
+            {
+                if (go.transform.parent == null)
+                {
+                    result+= DebugDeeper(go.transform)+"\n";
+                }
+            }
+            return result;
+        }
+
+        static string DebugDeeper(Transform transform)
+        {
+            int children = transform.childCount;
+            string result = String.Format(
+                "{0}-{1}>{2} has {3}\n",
+                (transform.gameObject.activeSelf ? ("activeself") : ("notactiveself")),
+                (transform.gameObject.activeSelf ? ("actInHier") : ("notActInHier")),
+                transform.name,
+                children
+            );
+            
+
+            for (int child = 0; child < children; child++)
+            {
+                result+=DebugDeeper(transform.GetChild(child))+"\n";
+            }
+            return result;
+        }
+
+
     }
 }
