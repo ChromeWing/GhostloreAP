@@ -77,6 +77,20 @@ namespace GhostloreAP
 
     }
 
+    public class XItemInstance : ExtendedBinding
+    {
+        public Item overrideItem;
+
+        public override void Destroy()
+        {
+            overrideItem = null;
+        }
+
+        public override void Init()
+        {
+
+        }
+    }
     public class XQuestRequirement : ExtendedBinding
     {
         public Creature target;

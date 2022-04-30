@@ -13,8 +13,6 @@ using System.IO;
  * ^^ you will want to grab the ItemData field inside itemInstance (Item type)
  * generate ExtendedItem extendedbinding for the Items in the archipelago shop in order to see who it's for.
  * 
- * grab LevelUpPanel with FindObjectByType, and store a reference to the animator in an extendedbinding.
- * ^^have the extendedbinding know when the animator is currently animating, so that it knows when to go in and display the notification for an item/check.
  * 
  */
 
@@ -49,6 +47,7 @@ namespace GhostloreAP
         private void InitSingletons()
         {
             CreatureCatalogLogger.instance.Init();
+            ItemFactory.instance.Init();
             ExtendedBindingManager.EnsureExists();
             GLAPLocationManager.EnsureExists();
             GLAPItemGiver.EnsureExists();
@@ -60,6 +59,7 @@ namespace GhostloreAP
             singletons.Add(QuestFactory.instance);
             singletons.Add(CreatureCatalogLogger.instance);
             singletons.Add(GLAPNotification.instance);
+            singletons.Add(ItemFactory.instance);
         }
 
         private void DisposeSingletons()
