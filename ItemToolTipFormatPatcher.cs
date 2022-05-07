@@ -18,6 +18,7 @@ namespace GhostloreAP
             {
                 Traverse.Create(__instance).Field("title").GetValue<TextMeshProUGUI>().text = xItem.overrideItem.ItemName;
                 Traverse.Create(__instance).Field("description").GetValue<TextMeshProUGUI>().text = xItem.overrideItem.Description;
+                Traverse.Create(__instance).Field("tags").GetValue<TextMeshProUGUI>().text = "Archipelago Shop Item";
 
             }
 

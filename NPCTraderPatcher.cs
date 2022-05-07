@@ -26,12 +26,17 @@ namespace GhostloreAP
 
         private Item referenceItem;
 
+        private Sprite braceletSprite;
+
+        public Sprite Bracelet { get { return braceletSprite; } }
+
         public List<Item> archipelagoShopItems { get; private set; }
 
         public void Init()
         {
             referenceItem = ItemManager.instance.GetItemFromName("Commodity Cube");
             archipelagoShopItems = new List<Item>();
+            braceletSprite = SpriteFactory.LoadSprite("bracelet.png");
         }
 
         public void Cleanup()
@@ -49,7 +54,7 @@ namespace GhostloreAP
 
             Traverse.Create(newItem).Field("itemName").SetValue(name);
             Traverse.Create(newItem).Field("description").SetValue(description);
-            Traverse.Create(newItem).Field("icon").SetValue(referenceItem.Icon);
+            Traverse.Create(newItem).Field("icon").SetValue(braceletSprite);
             Traverse.Create(newItem).Field("cost").SetValue(cost);
             Traverse.Create(newItem).Field("maxStackSize").SetValue(1);
             Traverse.Create(newItem).Field("attributes").SetValue(ItemAttributes.None);
@@ -77,7 +82,7 @@ namespace GhostloreAP
 
             for(int i = 0; i < 20; i++)
             {
-                AddItemToInventory(String.Format("Archipelago Item #{0}",i),"It's for someone...",333, referenceItem, traderCharacter);
+                AddItemToInventory(String.Format("Link Bracelet #{0}",i),"It's for someone...",333, referenceItem, traderCharacter);
             }
         }
 

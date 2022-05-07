@@ -24,14 +24,15 @@ namespace GhostloreAP
 
         private static Harmony harmony;
 
-        private bool active;
-
         private List<IGLAPSingleton> singletons;
 
         private static string DebugHierarchyPath = Path.Combine(LoadingManager.PersistantDataPath, "debug-hierarchy.txt");
 
+        public static ModSummary modInfo;
+
         public void OnCreated()
         {
+            modInfo = ModManager.Mods.Find((mod) => mod.Name == "Archipelago");
             DebugShowMessage("Huh?");
             singletons = new List<IGLAPSingleton>();
             InitSingletons();
@@ -74,7 +75,6 @@ namespace GhostloreAP
 
         public void OnGameLoaded(LoadMode mode)
         {
-            active = true;
             GLAPLocationManager.instance.StartListeners();
             GLAPNotification.instance.Init();
             WelcomePlayer();
@@ -97,7 +97,6 @@ namespace GhostloreAP
 
         private void Shutdown()
         {
-            active = false;
 
         }
 
