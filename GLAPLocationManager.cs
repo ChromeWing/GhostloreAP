@@ -65,11 +65,19 @@ namespace GhostloreAP
 
         private void CreateLocations()
         {
+            Creature shopPlaceholder = null;
             foreach(var c in CreatureCatalogLogger.instance.creatures)
             {
+                if (shopPlaceholder == null) { shopPlaceholder = c; }
                 for(int i = 0; i < 5; i++)
                 locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(MonsterWorkload.QuickPlaythrough,i)));
             }
+
+            for(int i = 0; i < 20; i++)
+            {
+                locations.Add(new GLAPLocation(shopPlaceholder, 10));
+            }
+
             locationsCleared = 0;
             totalLocationCount = locations.Count;
         }
@@ -98,7 +106,27 @@ namespace GhostloreAP
             GLAPNotification.instance.DisplayMessage(String.Format("You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
             GLAPNotification.instance.DisplayMessage(String.Format("#2test You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
             GLAPNotification.instance.DisplayMessage(String.Format("#3test You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName));
-            GLAPItemGiver.instance.DropItemsFrom(locations[0].creature, locations[0].count,MinLevel,MaxLevel);
+            GLAPItemGiver.instance.DropItemsFrom(locations[0].creature, locations[0].count, MinLevel, MaxLevel);
+            locations.RemoveAt(0);
+            locationsCleared++;
+        }
+
+        public void CompleteShopCheck(int slot)
+        {
+            AwardLocationItem();
+        }
+
+        private void AwardLocationItem()
+        {
+            if (locations.Count == 0) { return; }
+            GLAPModLoader.DebugShowMessage("about to drop items in OnKillQuestCompleted");
+            GLAPNotification.instance.DisplayMessage(String.Format("You found your loot for {0} {1}", locations[0].count, locations[0].creature.CreatureDisplayName),()=> { CompleteLocation(); });
+            
+        }
+
+        private void CompleteLocation()
+        {
+            GLAPItemGiver.instance.DropItemsFrom(locations[0].creature, locations[0].count, MinLevel, MaxLevel);
             locations.RemoveAt(0);
             locationsCleared++;
         }

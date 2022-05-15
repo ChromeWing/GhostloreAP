@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine;
 using HarmonyLib;
 using UnityEngine.UI;
+using System.Threading;
 
 namespace GhostloreAP
 {
@@ -20,10 +21,24 @@ namespace GhostloreAP
         private GameObject levelUpText;
         private RectTransform levelTextTransform;
 
-        private List<string> messages = new List<string>();
+        private List<MessageEvent> messages = new List<MessageEvent>();
+
+        private struct MessageEvent
+        {
+            public string text;
+            public System.Action onMessageAppear;
+
+            public MessageEvent(string text, Action onMessageAppear)
+            {
+                this.text = text;
+                this.onMessageAppear = onMessageAppear;
+            }
+
+        }
 
 
         private Task thread;
+        private CancellationTokenSource renderMessageLoopToken;
 
         public void Init()
         {
@@ -35,7 +50,7 @@ namespace GhostloreAP
         {
             if(thread != null)
             {
-                thread.Dispose();
+                renderMessageLoopToken.Cancel();
             }
             if (clonedPanel != null)
             {
@@ -47,17 +62,17 @@ namespace GhostloreAP
             GameObject.Destroy(gameObject);
         }
 
-        public void DisplayMessage(string message_)
+        public void DisplayMessage(string message_, System.Action onAppear=null)
         {
 
             GLAPModLoader.DebugShowMessage("Adding message: "+message_);
-            messages.Add(message_);
+            messages.Add(new MessageEvent(message_,onAppear));
             
         }
 
-        private async Task RenderMessage(string message_)
+        private async Task RenderMessage(MessageEvent message_)
         {
-            levelText.text = message_;
+            levelText.text = message_.text;
             glyphsText.text = "";
             skillpointText.text = "";
             animator.ResetTrigger("start");
@@ -65,6 +80,7 @@ namespace GhostloreAP
             levelUpText.SetActive(false);
             clonedPanel.gameObject.SetActive(true);
 
+            message_.onMessageAppear?.Invoke();
 
             await Task.Delay(3000);
             animator.ResetTrigger("start");
@@ -73,7 +89,8 @@ namespace GhostloreAP
 
         private async Task RenderMessageLoop()
         {
-            while (true)
+            renderMessageLoopToken = new CancellationTokenSource();
+            while (!renderMessageLoopToken.IsCancellationRequested)
             {
                 if(messages.Count > 0)
                 {

@@ -34,7 +34,7 @@ namespace GhostloreAP
 
         public void Init()
         {
-            referenceItem = ItemManager.instance.GetItemFromName("Commodity Cube");
+            referenceItem = ItemManager.instance.GetItemFromName("Sona");
             archipelagoShopItems = new List<Item>();
             braceletSprite = SpriteFactory.LoadSprite("bracelet.png");
         }
@@ -46,7 +46,7 @@ namespace GhostloreAP
         }
 
 
-        public void AddItemToInventory(string name, string description, int cost, Item item,CharacterContainer character)
+        public void AddItemToInventory(int slot,string name, string description, int cost, Item item,CharacterContainer character)
         {
             ItemInstance itemInstance = Singleton<ItemManager>.instance.SpawnItem(item, 1, 1, 0f, character.transform.position, character.transform.position);
 
@@ -71,6 +71,8 @@ namespace GhostloreAP
             ExtendedBindingManager.instance.RegisterAndSet<XItemInstance>(itemInstance, (s) =>
             {
                 s.overrideItem = newItem;
+                s.cost = cost;
+                s.AP_ShopSlot = slot;
             });
             itemInstance.PickupOffGround(character);
         }
@@ -82,7 +84,7 @@ namespace GhostloreAP
 
             for(int i = 0; i < 20; i++)
             {
-                AddItemToInventory(String.Format("Link Bracelet #{0}",i),"It's for someone...",333, referenceItem, traderCharacter);
+                AddItemToInventory(i,String.Format("Link Bracelet #{0}",i),"It's for someone...",3333, referenceItem, traderCharacter);
             }
         }
 

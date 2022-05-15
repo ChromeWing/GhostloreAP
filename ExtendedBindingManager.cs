@@ -80,6 +80,8 @@ namespace GhostloreAP
     public class XItemInstance : ExtendedBinding
     {
         public Item overrideItem;
+        public int cost;
+        public int AP_ShopSlot = -1;
 
         public override void Destroy()
         {

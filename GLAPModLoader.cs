@@ -8,7 +8,6 @@ using HarmonyLib;
 using System.IO;
 
 /* TODO:
- * find out how to adjust cost of an item in the shop, and have that actually read for the transaction
  * postfix InventoryPanel.ReceiveDraggedItem() (the one that returns a bool) in order to detect a transaction occurred for a particular itemInstance in the archipelago shop.
  * ^^ you will want to grab the ItemData field inside itemInstance (Item type)
  * generate ExtendedItem extendedbinding for the Items in the archipelago shop in order to see who it's for.
