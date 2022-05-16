@@ -42,9 +42,9 @@ namespace GhostloreAP
         public void OnCreated()
         {
             modInfo = ModManager.Mods.Find((mod) => mod.Name == "Archipelago");
-            DebugShowMessage("Huh?");
             singletons = new List<IGLAPSingleton>();
             InitSingletons();
+            DebugShowMessage("Huh?");
 
             DebugShowMessage("Huh??");
 
@@ -118,14 +118,21 @@ namespace GhostloreAP
 
         }
 
-        public static void DebugShowMessage(string msg_)
+        public static void DebugShowMessage(string msg_,bool logIt_=true)
         {
             if(debugMsg == null)
             {
                 var go = new GameObject("Archipelago");
                 debugMsg = go.AddComponent<TestTextDrawer>();
             }
-            debugMsg.DisplayMessage(msg_); 
+
+            if (logIt_)
+            {
+                GLAPNotification.instance.DisplayLog(msg_);
+            }
+               
+
+            //debugMsg.DisplayMessage(msg_); 
         }
 
         private async Task DisplayMessageAsyncRoutine(string msg_)

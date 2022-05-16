@@ -9,6 +9,7 @@ using HarmonyLib;
 using UnityEngine.UI;
 using System.Threading;
 
+
 namespace GhostloreAP
 {
     public class GLAPNotification : Singleton<GLAPNotification>, IGLAPSingleton
@@ -20,6 +21,12 @@ namespace GhostloreAP
         private Animator animator;
         private GameObject levelUpText;
         private RectTransform levelTextTransform;
+
+        private Canvas canvas;
+
+        private TMP_Text logText;
+        private RectTransform logTextTransform;
+        private List<string> logs = new List<string>();
 
         private List<MessageEvent> messages = new List<MessageEvent>();
 
@@ -42,12 +49,14 @@ namespace GhostloreAP
 
         public void Init()
         {
-            thread = FindQuestProgressPanel();
+            thread = InitFlow();
+
         }
 
 
         public void Cleanup()
         {
+            if (this == null) { return; }
             if(thread != null)
             {
                 renderMessageLoopToken.Cancel();
@@ -64,14 +73,51 @@ namespace GhostloreAP
 
         public void DisplayMessage(string message_, System.Action onAppear=null)
         {
-
-            GLAPModLoader.DebugShowMessage("Adding message: "+message_);
             messages.Add(new MessageEvent(message_,onAppear));
             
         }
 
+        public void DisplayLog(string log_)
+        {
+            logs.Add(log_);
+            RefreshLogs();
+
+        }
+
+        private void RefreshLogs()
+        {
+            while(logs.Count > 14)
+            {
+                logs.RemoveAt(0);
+            }
+            if (logText != null)
+            {
+                string fullText_ = "";
+                for(int i = 0; i < logs.Count; i++)
+                {
+                    fullText_ = String.Format("{1}> {0}\n", logs[i],fullText_);
+                }
+                logText.text = fullText_;
+                if (!logText.gameObject.activeInHierarchy)
+                {
+                    logText.gameObject.SetActive(true);
+                    var p = logText.transform.parent;
+                    while(p != null)
+                    {
+                        p.gameObject.SetActive(true);
+                        p = p.parent;
+                    }
+                }
+            }
+        }
+
         private async Task RenderMessage(MessageEvent message_)
         {
+            while (LostUIElements())
+            {
+                await CreateUIElements();
+                await Task.Delay(500);
+            }
             levelText.text = message_.text;
             glyphsText.text = "";
             skillpointText.text = "";
@@ -83,7 +129,10 @@ namespace GhostloreAP
             message_.onMessageAppear?.Invoke();
 
             await Task.Delay(3000);
-            animator.ResetTrigger("start");
+            if(animator != null)
+            {
+                animator.ResetTrigger("start");
+            }
 
         }
 
@@ -92,18 +141,72 @@ namespace GhostloreAP
             renderMessageLoopToken = new CancellationTokenSource();
             while (!renderMessageLoopToken.IsCancellationRequested)
             {
+                if(LostUIElements())
+                {
+                    await CreateUIElements();
+                }
+                else
+                {
+                    RefreshLogs();
+                }
+
                 if(messages.Count > 0)
                 {
-                    GLAPModLoader.DebugShowMessage("Detected new message!");
                     await RenderMessage(messages[0]);
                     messages.RemoveAt(0);
                 }
 
-                await Task.Yield();
+                await Task.Delay(500);
             }
         }
 
-        private async Task FindQuestProgressPanel()
+        private bool ReloadLogs()
+        {
+            canvas = null;
+            foreach (var c in Component.FindObjectsOfType<Canvas>())
+            {
+                if (c.gameObject.name == "UI")
+                {
+                    canvas = c;
+                }
+            }
+
+            if (!canvas) { return false; }
+
+            GLAPModLoader.DebugShowMessage(canvas.gameObject.name,false);
+
+            if(logText == null)
+            {
+                logText = Instantiate(levelText.gameObject, levelText.transform.position, levelText.transform.rotation, canvas.transform).GetComponent<TMP_Text>();
+                logText.transform.SetAsLastSibling();
+                logTextTransform = logText.GetComponent<RectTransform>();
+                logText.fontSize = logText.fontSize * .6f;
+                RefreshLogs();
+                logTextTransform.pivot = new Vector2(.5f, .5f);
+                logTextTransform.anchorMin = new Vector2(.01f, .4f);
+                logTextTransform.anchorMax = new Vector2(.4f, .85f);
+                logText.alignment = TextAlignmentOptions.TopLeft;
+                logTextTransform.offsetMin = Vector2.zero;
+                logTextTransform.offsetMax = Vector2.zero;
+                logTextTransform.sizeDelta = Vector2.zero;
+                
+            }
+
+            return true;
+        }
+
+        private async Task InitFlow()
+        {
+            await CreateUIElements();
+            await RenderMessageLoop();
+        }
+
+        private bool LostUIElements()
+        {
+            return logText == null;
+        }
+
+        private async Task CreateUIElements()
         {
             while (TimeManager.instance.IsPaused())
             {
@@ -118,22 +221,26 @@ namespace GhostloreAP
             }
             GLAPModLoader.DebugShowMessage("QuestProgressPanel FOUND!");
 
-            clonedPanel = Instantiate(panel.gameObject,panel.transform.position,panel.transform.rotation,panel.transform.parent).GetComponent<LevelUpPanel>();
+            if(clonedPanel == null)
+            {
+                clonedPanel = Instantiate(panel.gameObject,panel.transform.position,panel.transform.rotation,panel.transform.parent).GetComponent<LevelUpPanel>();
 
-            clonedPanel.gameObject.transform.SetParent(panel.gameObject.transform.parent);
+                clonedPanel.gameObject.transform.SetParent(panel.gameObject.transform.parent);
 
-            levelText = Traverse.Create(clonedPanel).Field("levelText").GetValue<TMP_Text>();
-            glyphsText = Traverse.Create(clonedPanel).Field("glyphs").GetValue<TMP_Text>();
-            skillpointText = Traverse.Create(clonedPanel).Field("skillpoint").GetValue<TMP_Text>();
-            levelText.fontSize = levelText.fontSize * .6f;
-            levelTextTransform = levelText.GetComponent<RectTransform>();
-            levelTextTransform.localPosition = levelTextTransform.localPosition+Vector3.up*22;
-            levelTextTransform.sizeDelta = new Vector2(500,400);
+                levelText = Traverse.Create(clonedPanel).Field("levelText").GetValue<TMP_Text>();
+                glyphsText = Traverse.Create(clonedPanel).Field("glyphs").GetValue<TMP_Text>();
+                skillpointText = Traverse.Create(clonedPanel).Field("skillpoint").GetValue<TMP_Text>();
+                levelText.fontSize = levelText.fontSize * .6f;
+                levelTextTransform = levelText.GetComponent<RectTransform>();
+                levelTextTransform.localPosition = levelTextTransform.localPosition+Vector3.up*22;
+                levelTextTransform.sizeDelta = new Vector2(500, 400);
+            }
+
+            ReloadLogs();
 
             animator = Traverse.Create(clonedPanel).Field("animator").GetValue<Animator>();
             levelUpText = clonedPanel.transform.GetChild(1).gameObject;
 
-            await RenderMessageLoop();
         }
 
     }
