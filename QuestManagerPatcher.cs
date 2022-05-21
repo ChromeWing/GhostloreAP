@@ -7,14 +7,7 @@ using HarmonyLib;
 
 namespace GhostloreAP
 {
-    public enum MonsterWorkload
-    {
-        TEST,
-        QuickPlaythrough,
-        SinglePlaythrough,
-        SomeGrinding,
-        GrindingRequired
-    }
+    
 
     public class QuestFactory : IGLAPSingleton
     {
@@ -56,10 +49,36 @@ namespace GhostloreAP
         public static QuestFactory _inst;
 
         private List<Quest> _quests = new List<Quest>();
+
+        private List<QuestInstance> _questInstances = new List<QuestInstance>();
+
+        public void ClearAPQuestInstances()
+        {
+            _questInstances.Clear();
+        }
+        public void AddAPQuestInstance(QuestInstance q_)
+        {
+            _questInstances.Add(q_);
+        }
+
+        public bool CompletedAllKillsForCreature(Creature creature)
+        {
+            foreach(QuestInstance q in _questInstances)
+            {
+                if (!q.Completed) { continue; }
+                XQuestInstance xq = ExtendedBindingManager.instance.GetExtended<XQuestInstance>(q);
+                if(xq != null)
+                {
+                    if (xq.Matches(creature)) { return true; }
+                }
+            }
+            return false;
+        }
         
         public void Cleanup()
         {
             _quests.Clear();
+            _questInstances.Clear();
         }
 
         public List<Quest> CreateAllAPQuests()
@@ -68,7 +87,7 @@ namespace GhostloreAP
             List<Quest> allAPQuests = new List<Quest>();
             foreach(var creature in CreatureCatalogLogger.instance.creatures)
             {
-                allAPQuests.Add(CreateAPQuest(String.Format("AP: {0}", creature.CreatureDisplayName), creature, MonsterWorkload.QuickPlaythrough));
+                allAPQuests.Add(CreateAPQuest(String.Format("AP: {0}", creature.CreatureDisplayName), creature, GLAPSettings.workload));
             }
             _quests = allAPQuests;
             return allAPQuests;
@@ -89,6 +108,11 @@ namespace GhostloreAP
             }
 
             Traverse.Create(q).Field("stages").SetValue(_stage.ToArray());
+
+            ExtendedBindingManager.instance.RegisterAndSet<XQuest>(q, (xq) =>
+            {
+                xq.target = creature_;
+            });
 
             return q;
         }
@@ -145,6 +169,20 @@ namespace GhostloreAP
             //GLAPModLoader.DebugShowMessage("new quest count is 14? " + newCount);
             ___questInstances = (from c in ___quests
                                  select c.MakeInstance()).ToArray<QuestInstance>();
+
+            QuestFactory.instance.ClearAPQuestInstances();
+            foreach(QuestInstance q_ in ___questInstances)
+            {
+                XQuest xQuest = ExtendedBindingManager.instance.GetExtended<XQuest>(q_.Quest);
+                if(xQuest != null)
+                {
+                    ExtendedBindingManager.instance.RegisterAndSet<XQuestInstance>(q_, (xqi) =>
+                    {
+                        xqi.target = xQuest.target;
+                    });
+                    QuestFactory.instance.AddAPQuestInstance(q_);
+                }
+            }
 
         }
     }

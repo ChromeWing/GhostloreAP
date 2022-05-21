@@ -178,7 +178,7 @@ namespace GhostloreAP
             if(logText == null)
             {
                 logText = Instantiate(levelText.gameObject, levelText.transform.position, levelText.transform.rotation, canvas.transform).GetComponent<TMP_Text>();
-                logText.transform.SetAsLastSibling();
+                logText.transform.SetAsFirstSibling();
                 logTextTransform = logText.GetComponent<RectTransform>();
                 logText.fontSize = logText.fontSize * .6f;
                 RefreshLogs();

@@ -15,7 +15,8 @@ namespace GhostloreAP
         {
             ___onDeath.Invoke(killer, ___character);
             //never drop loot from a killed creature in archipelago. (loot drops come from Items granted from the multiworld instead.)
-            return false;
+            if (___character.Creature == null) { return false; }
+            return QuestFactory.instance.CompletedAllKillsForCreature(___character.Creature);
         }
     }
 }

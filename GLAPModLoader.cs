@@ -8,10 +8,6 @@ using HarmonyLib;
 using System.IO;
 
 /* TODO:
- * postfix InventoryPanel.ReceiveDraggedItem() (the one that returns a bool) in order to detect a transaction occurred for a particular itemInstance in the archipelago shop.
- * ^^ you will want to grab the ItemData field inside itemInstance (Item type)
- * generate ExtendedItem extendedbinding for the Items in the archipelago shop in order to see who it's for.
- * figure out solution for item levels on a hypothetical async multiworld
  * fork Archipelago
  * techspike archipelago world script setup
  * define an AP world for Ghostlore
@@ -19,8 +15,9 @@ using System.IO;
  * test locally
  * interface current systems into the AP client package
  * automatically clean up quest instances on detecting which checks were already done on loading into the game (since injected quests do not save)
+ * sync the item shop to know the current state of which checks were already purchased.
  * fix the item shop erasing the potions etc.
- * detect goal reached
+ * detect different goals reached
  * add cool items for the item shop
  * 
  */

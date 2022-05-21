@@ -43,7 +43,16 @@ namespace GhostloreAP
                 GLAPModLoader.DebugShowMessage("Dropping item level "+itemLevel);
                 if (active)
                 {
-                    creature.LootTable.TrySpawnLoot(player, itemLevel, player.transform.position + Vector3.up * .1f, player.transform.position);
+                    //NOTE: we are going to stick with player level to determine item drop.  If the player indicates they want async runs, I could use async levels instead (based on progress)
+                    switch (GLAPSettings.itemLevelType)
+                    {
+                        case ItemLevelType.TiedToCharacterLevel:
+                            creature.LootTable.TrySpawnLoot(player, player.Level, player.transform.position + Vector3.up * .1f, player.transform.position);
+                            break;
+                        case ItemLevelType.TiedToProgression:
+                            creature.LootTable.TrySpawnLoot(player, itemLevel, player.transform.position + Vector3.up * .1f, player.transform.position);
+                            break;
+                    }
                 }
                 else
                 {

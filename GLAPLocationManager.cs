@@ -70,7 +70,7 @@ namespace GhostloreAP
             {
                 if (shopPlaceholder == null) { shopPlaceholder = c; }
                 for(int i = 0; i < 5; i++)
-                locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(MonsterWorkload.QuickPlaythrough,i)));
+                locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(GLAPSettings.workload,i)));
             }
 
             for(int i = 0; i < 20; i++)

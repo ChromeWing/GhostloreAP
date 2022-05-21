@@ -21,7 +21,7 @@ namespace GhostloreAP
             bindings = new Dictionary<System.Type, List<ExtendedBinding>>();
         }
 
-        public void Register(System.Object obj, ExtendedBinding binding)
+        public ExtendedBinding Register(System.Object obj, ExtendedBinding binding)
         {
             binding.SetObj(obj);
             binding.Init();
@@ -30,7 +30,7 @@ namespace GhostloreAP
                 if (list.Contains(binding))
                 {
                     list[list.IndexOf(binding)] = binding;
-                    return;
+                    return binding;
                 }
                 list.Add(binding);
             }
@@ -40,13 +40,14 @@ namespace GhostloreAP
                 newList.Add(binding);
                 bindings.Add(obj.GetType(), newList);   
             }
+            return binding;
         }
 
-        public void RegisterAndSet<T>(System.Object obj,Action<T> setter) where T : ExtendedBinding,new()
+        public T RegisterAndSet<T>(System.Object obj,Action<T> setter) where T : ExtendedBinding,new()
         {
             T binding = new T();
             binding.Set<T>(setter);
-            Register(obj, binding);
+            return Register(obj, binding) as T;
         }
 
         public T GetExtended<T>(System.Object obj) where T : ExtendedBinding
@@ -93,6 +94,42 @@ namespace GhostloreAP
 
         }
     }
+
+    public class XQuest : ExtendedBinding
+    {
+        public Creature target;
+
+        public override void Destroy()
+        {
+
+        }
+
+        public override void Init()
+        {
+
+        }
+    }
+
+    public class XQuestInstance : ExtendedBinding
+    {
+        public Creature target;
+
+        public override void Destroy()
+        {
+
+        }
+
+        public override void Init()
+        {
+
+        }
+
+        public bool Matches(Creature creature)
+        {
+            return creature == target;
+        }
+    }
+
     public class XQuestRequirement : ExtendedBinding
     {
         public Creature target;
