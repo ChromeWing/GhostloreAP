@@ -22,9 +22,12 @@ namespace GhostloreAP
         TiedToProgression
     }
 
+
     public static class GLAPSettings
     {
         public static ItemLevelType itemLevelType = ItemLevelType.TiedToCharacterLevel;
         public static MonsterWorkload workload = MonsterWorkload.TEST;
+        public static int baseItemShopCost = 100;
+        public static int killQuestsPerMonster = 5; //allowed values: 3-10
     }
 }

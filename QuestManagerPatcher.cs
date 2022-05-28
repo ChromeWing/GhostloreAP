@@ -23,27 +23,73 @@ namespace GhostloreAP
             }
         }
 
-        public static int GetQuestWorkload(MonsterWorkload workload_,int i)
+        public static int GetQuestWorkload(Creature creature_,MonsterWorkload workload_,int i)
         {
-            int[] killCounts = { 5, 5, 5, 5, 5 };
+            int[] killCounts = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
 
             switch (workload_)
             {
                 case MonsterWorkload.QuickPlaythrough:
-                    killCounts = new int[] { 5, 5, 10, 10, 10 };
+                    killCounts = new int[] { 5, 5, 10, 10, 10, 10, 10, 10, 10, 10 };
                     break;
                 case MonsterWorkload.SinglePlaythrough:
-                    killCounts = new int[] { 5, 10, 15, 20, 20 };
+                    killCounts = new int[] { 5, 10, 15, 20, 20, 20, 20, 20, 20, 20 };
                     break;
                 case MonsterWorkload.SomeGrinding:
-                    killCounts = new int[] { 5, 10, 20, 30, 40 };
+                    killCounts = new int[] { 5, 10, 20, 30, 40, 40, 40, 40, 40, 40 };
                     break;
                 case MonsterWorkload.GrindingRequired:
-                    killCounts = new int[] { 10, 20, 30, 40, 50 };
+                    killCounts = new int[] { 10, 20, 30, 40, 50, 50, 50, 50, 50, 50 };
                     break;
             }
 
-            return killCounts[i];
+            return Math.Max((int)Math.Ceiling(killCounts[i]*GetCreatureWorkloadMultiplier(creature_)),1);
+        }
+
+        private static float GetCreatureWorkloadMultiplier(Creature creature_)
+        {
+            //multiply bosses by zero to ensure they are only a 1-kill quest (workload will round it up to 1 automatically)
+            switch (creature_.CreatureDisplayName)
+            {
+                //bosses:
+                case "Ice Jinn":
+                    return 0;
+                case "Thunder Jinn":
+                    return 0;
+                case "Fire Jinn":
+                    return 0;
+                case "Rafflesia":
+                    return 0;
+                case "Mogui Summoner":
+                    return 0;
+                //regular monsters:
+                case "Gui-Kia":
+                    return 1.5f;
+                case "Pontianak Tree":
+                    return 0.5f;
+
+            }
+            return 1;
+        }
+
+        public static int GetQuestCountForCreature(Creature creature_)
+        {
+            switch (creature_.CreatureDisplayName)
+            {
+                case "Ice Jinn":
+                    return 1;
+                case "Thunder Jinn":
+                    return 1;
+                case "Fire Jinn":
+                    return 1;
+                case "Rafflesia":
+                    return 1;
+                case "Mogui Summoner":
+                    return 1;
+                    
+            }
+
+            return GLAPSettings.killQuestsPerMonster;
         }
 
         public static QuestFactory _inst;
@@ -65,7 +111,7 @@ namespace GhostloreAP
         {
             foreach(QuestInstance q in _questInstances)
             {
-                if (!q.Completed) { continue; }
+                if (q.CurrentStage < q.Quest.Stages.Length-1) { continue; }
                 XQuestInstance xq = ExtendedBindingManager.instance.GetExtended<XQuestInstance>(q);
                 if(xq != null)
                 {
@@ -102,10 +148,12 @@ namespace GhostloreAP
 
             List<QuestStage> _stage = new List<QuestStage>();
             
-            for(int i = 0; i < 5; i++)
+            for(int i = 0; i < GetQuestCountForCreature(creature_); i++)
             {
                 _stage.Add(CreateStage(creature_,i,workload_));
             }
+
+            _stage.Add(CreateStage(creature_, -1, workload_));
 
             Traverse.Create(q).Field("stages").SetValue(_stage.ToArray());
 
@@ -119,17 +167,39 @@ namespace GhostloreAP
 
         private QuestStage CreateStage(Creature creature_,int i,MonsterWorkload workload_)
         {
-            int requirement_ = GetQuestWorkload(workload_, i);
+            if (i < 0)
+            {
+                return ConstructStage(string.Format("Conquered {0}!", creature_.CreatureDisplayName), creature_, 9999999);
+            }
+
+            int requirement_ = GetQuestWorkload(creature_,workload_, i);
             string[] killDescriptor = {
                 "Kill",
-                "Eliminate",
+                "Slay",
+                "Wipe Out",
                 "Destroy",
-                "Exterminate",
-                "Vanquish"
+                "Slaughter",
+                "Vanquish",
+                "Execute",
+                "Annihilate",
+                "Obliterate",
+                "Exterminate"
             };
 
+            string killText = killDescriptor[i];
+
+            if (GetQuestCountForCreature(creature_) == 1)
+            {
+                killText = "Defeat";
+            }
+
+            return ConstructStage(string.Format("{0} {1} {2}", killText, requirement_, creature_.CreatureDisplayName), creature_,requirement_);
+        }
+
+        private QuestStage ConstructStage(string name_, Creature creature_, int requirement_)
+        {
             QuestStage s = new QuestStage();
-            Traverse.Create(s).Field("stageName").SetValue(string.Format("{0} {1} {2}", killDescriptor[i], requirement_, creature_.CreatureDisplayName));
+            Traverse.Create(s).Field("stageName").SetValue(name_);
             Traverse.Create(s).Field("rewards").SetValue(new QuestReward[0]);
 
             List<QuestRequirement> _requirements = new List<QuestRequirement>();

@@ -84,7 +84,7 @@ namespace GhostloreAP
 
             for(int i = 0; i < 20; i++)
             {
-                AddItemToInventory(i,String.Format("Link Bracelet #{0}",i),"It's for someone...",1, referenceItem, traderCharacter);
+                AddItemToInventory(i,String.Format("Link Bracelet #{0}",i),"It's for someone...",GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
             }
         }
 

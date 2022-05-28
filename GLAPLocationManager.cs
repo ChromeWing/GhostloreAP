@@ -69,8 +69,8 @@ namespace GhostloreAP
             foreach(var c in CreatureCatalogLogger.instance.creatures)
             {
                 if (shopPlaceholder == null) { shopPlaceholder = c; }
-                for(int i = 0; i < 5; i++)
-                locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(GLAPSettings.workload,i)));
+                for(int i = 0; i < GLAPSettings.killQuestsPerMonster; i++)
+                locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(c,GLAPSettings.workload,i)));
             }
 
             for(int i = 0; i < 20; i++)
