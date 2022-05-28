@@ -94,14 +94,13 @@ namespace GhostloreAP
             List<Creature> lootableCreatures_ = new List<Creature>();
             var monsters = CreatureManager.instance.CreaturePrefabs;
 
-            for (int c = 0; c < monsters.Length; c++)
+            foreach (Creature c in monsters.Keys)
             {
-                var m = monsters[c % monsters.Length];
-                if (m.Creature == null || m.Creature.LootTable == null || m.Creature.CreatureDisplayName == null || m.Creature.CreatureDisplayName.Length == 0)
+                if (c == null || c.LootTable == null || c.CreatureDisplayName == null || c.CreatureDisplayName.Length == 0)
                 {
                     continue;
                 }
-                lootableCreatures_.Add(m.Creature);
+                lootableCreatures_.Add(c);
             }
             lootableCreatures = lootableCreatures_;
             return lootableCreatures_;
@@ -116,12 +115,11 @@ namespace GhostloreAP
             for (int c = 0; c < validCreatureNames.Length; c++)
             {
                 var mName = validCreatureNames[c];
-                for(int i = 0;i< monsters.Length; i++)
+                foreach(Creature m in monsters.Keys)
                 {
-                    var m = monsters[i];
                     if (m.CreatureDisplayName == mName)
                     {
-                        creatures_.Add(m.Creature);
+                        creatures_.Add(m);
                         break;
                     }
                 }
