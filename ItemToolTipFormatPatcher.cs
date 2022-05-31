@@ -13,8 +13,9 @@ namespace GhostloreAP
     {
         static void Postfix(Item item, ItemInstance itemInstance, ItemToolTipFormat __instance)
         {
+            if(item == null || itemInstance == null) { return; }
             XItemInstance xItem = ExtendedBindingManager.instance.GetExtended<XItemInstance>(itemInstance);
-            if(xItem != null)
+            if (xItem != null)
             {
                 Traverse.Create(__instance).Field("title").GetValue<TextMeshProUGUI>().text = xItem.overrideItem.ItemName;
                 Traverse.Create(__instance).Field("description").GetValue<TextMeshProUGUI>().text = xItem.overrideItem.Description;

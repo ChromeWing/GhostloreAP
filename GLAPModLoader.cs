@@ -141,8 +141,6 @@ namespace GhostloreAP
             }
             await Task.Delay(500);
             GLAPNotification.instance.DisplayMessage("Welcome!");
-            GLAPNotification.instance.DisplayMessage("Welcome! x2");
-            GLAPNotification.instance.DisplayMessage("Welcome! x3");
 
 
 
