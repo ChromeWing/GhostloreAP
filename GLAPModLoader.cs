@@ -8,18 +8,23 @@ using HarmonyLib;
 using System.IO;
 
 /* TODO:
- * fork Archipelago
- * techspike archipelago world script setup
- * define an AP world for Ghostlore
- * design a settings file
- * test locally
- * interface current systems into the AP client package
- * automatically clean up quest instances on detecting which checks were already done on loading into the game (since injected quests do not save)
- * sync the item shop to know the current state of which checks were already purchased.
- * fix the item shop erasing the potions etc.
- * detect different goals reached
- * add cool items for the item shop
- * 
+4h * define an AP world for Ghostlore (almost done)
+5h * interface current systems into the AP client package
+2h * automatically clean up quest instances on detecting which checks were already done on loading into the game (since injected quests do not save)
+1h * sync the item shop to know the current state of which checks were already purchased.
+1h * fix the item shop erasing the potions etc.
+2h * detect different goals reached
+4h * complete the recipe system in this mod (loading currently unlocked recipes in the restaurant menu)
+6h * add Chthonite and Astralite as checks
+3h * successfully create a foolproof way of handing over the Chthonite and Astralite items to the player
+2h * add chests as checks (up to 50)
+2h * add coin rewards to the pool (from chests)
+1h * make elite monsters count as 5 kills of that breed
+2h * add kill count feed to the right half of the screen HUD
+5h * connect successfully to a locally hosted multiworld
+8h * create text field form on character creation that saves an Archipelago profile (this will allow multiple saved characters to have their own individually assigned multiworld)
+2h * save granted items to the archipelago profile (in case someone were to create multiple characters under the same server)
+total: * 50h
  */
 
 namespace GhostloreAP
