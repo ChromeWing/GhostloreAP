@@ -64,6 +64,7 @@ namespace GhostloreAP
             GLAPLocationManager.EnsureExists();
             GLAPItemGiver.EnsureExists();
             GLAPNotification.EnsureExists();
+            GLAPClient.EnsureExists();
 
             singletons.Add(ExtendedBindingManager.instance);
             singletons.Add(GLAPLocationManager.instance);
@@ -72,6 +73,7 @@ namespace GhostloreAP
             singletons.Add(CreatureCatalogLogger.instance);
             singletons.Add(GLAPNotification.instance);
             singletons.Add(ItemFactory.instance);
+            singletons.Add(GLAPClient.instance);
         }
 
         private void DisposeSingletons()
@@ -89,7 +91,8 @@ namespace GhostloreAP
             GLAPLocationManager.instance.StartListeners();
             GLAPNotification.instance.Init();
             WelcomePlayer();
-            
+            GLAPClient.instance.Connect("ChromeWingGL");
+
         }
 
         public void OnGameUnloaded()
@@ -134,7 +137,7 @@ namespace GhostloreAP
             }
                
 
-            //debugMsg.DisplayMessage(msg_); 
+            debugMsg.DisplayMessage(msg_); 
         }
 
         private async Task DisplayMessageAsyncRoutine(string msg_)
