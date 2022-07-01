@@ -111,7 +111,7 @@ namespace GhostloreAP
 
         public void CompleteShopCheck(int slot)
         {
-            AwardLocationItem();
+            GLAPClient.instance.CompleteShopCheckAsync(slot);
         }
 
         private void AwardLocationItem()

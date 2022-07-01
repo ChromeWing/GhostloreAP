@@ -32,11 +32,23 @@ namespace GhostloreAP
 
         public List<Item> archipelagoShopItems { get; private set; }
 
+        public string[] shopItemNames;
+
         public void Init()
         {
             referenceItem = ItemManager.instance.GetItemFromName("Sona");
             archipelagoShopItems = new List<Item>();
+            shopItemNames = new string[20];
             braceletSprite = SpriteFactory.LoadSprite("bracelet.png");
+
+        }
+
+        public void CacheShopItemNames()
+        {
+            GLAPClient.instance.GetShopEntryNamesAsync((i,name) =>
+            {
+                shopItemNames[i] = name;
+            });
         }
 
         public void Cleanup()
@@ -68,6 +80,8 @@ namespace GhostloreAP
             Traverse.Create(newItem).Field("weaponSprite").SetValue(referenceItem.WeaponSprite);
             Traverse.Create(newItem).Field("tattoo").SetValue(referenceItem.Tattoo);
 
+            GLAPNotification.instance.DisplayMessage("AP_ShopSlot=" + slot);
+
             ExtendedBindingManager.instance.RegisterAndSet<XItemInstance>(itemInstance, (s) =>
             {
                 s.overrideItem = newItem;
@@ -81,11 +95,13 @@ namespace GhostloreAP
         public void SetupArchipelagoShop(NPCTrader trader)
         {
             var traderCharacter = trader.ParentCharacter;
-
-            for(int i = 0; i < 20; i++)
+            for (int i = 0; i < 20; i++)
             {
-                AddItemToInventory(i,String.Format("Link Bracelet #{0}",i),"It's for someone...",GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
+                if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
+                AddItemToInventory(i, shopItemNames[i], "A strange bracelet that seems to link items between worlds...", GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
+                
             }
+
         }
 
         
