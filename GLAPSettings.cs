@@ -43,21 +43,26 @@ namespace GhostloreAP
 
         public static void Set(Dictionary<string,object> data)
         {
+            GLAPModLoader.DebugShowMessage("gonna Set Options...");
+            foreach(var key in data.Keys)
+            {
+                GLAPModLoader.DebugShowMessage(key);
+
+            }
+            GLAPModLoader.DebugShowMessage("done showing keys.");
+
+            killQuestsPerMonster = Convert.ToInt32(data["kill_quests_per_monster"]);
             GLAPModLoader.DebugShowMessage("SettingSettings!");
+            itemLevelType = (ItemLevelType)Convert.ToInt32(data["item_level_type"]);
             GLAPModLoader.DebugShowMessage("SettingSettings!");
+            workload = (MonsterWorkload)Convert.ToInt32(data["monster_workload"]);
             GLAPModLoader.DebugShowMessage("SettingSettings!");
-            killQuestsPerMonster = ((int)data["kill_quests_per_monster"]);
+            baseItemShopCost = Convert.ToInt32(data["base_item_shop_price"]);
             GLAPModLoader.DebugShowMessage("SettingSettings!");
-            itemLevelType = (ItemLevelType)((int)data["item_level_type"]);
+            goalType = (GoalType)Convert.ToInt32(data["goal"]);
             GLAPModLoader.DebugShowMessage("SettingSettings!");
-            workload = (MonsterWorkload)((int)data["monster_workload"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
-            baseItemShopCost = ((int)data["base_item_shop_price"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
-            goalType = (GoalType)((int)data["goal"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
-            deathlink = (int)data["death_link"] == 1;
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
+            deathlink = Convert.ToInt32(data["death_link"]) == 1;
+            GLAPModLoader.DebugShowMessage("DONE!");
         }
     }
 }

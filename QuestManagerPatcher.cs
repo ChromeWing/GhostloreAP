@@ -98,6 +98,18 @@ namespace GhostloreAP
 
         private List<QuestInstance> _questInstances = new List<QuestInstance>();
 
+        private bool _initializedQuestInstances = false;
+
+        public bool CheckInitializedQuestInstances()
+        {
+            if (!_initializedQuestInstances)
+            {
+                _initializedQuestInstances = true;
+                return false;
+            }
+            return true;
+        }
+
         public void ClearAPQuestInstances()
         {
             _questInstances.Clear();
@@ -109,13 +121,23 @@ namespace GhostloreAP
 
         public bool CompletedAllKillsForCreature(Creature creature)
         {
-            foreach(QuestInstance q in _questInstances)
+            GLAPModLoader.DebugShowMessage(">>>>about to test questInstances.");
+            foreach (QuestInstance q in _questInstances)
             {
+                GLAPModLoader.DebugShowMessage(">>>>we did a questinstance!!!!");
+                GLAPModLoader.DebugShowMessage(">>>currentStage=" + q.CurrentStage + ", length-1=" + (q.Quest.Stages.Length - 1));
                 if (q.CurrentStage < q.Quest.Stages.Length-1) { continue; }
+                GLAPModLoader.DebugShowMessage(">>>>we passed a questinstance!!!!");
                 XQuestInstance xq = ExtendedBindingManager.instance.GetExtended<XQuestInstance>(q);
                 if(xq != null)
                 {
+                    GLAPModLoader.DebugShowMessage(">>>>we are in the matches!!!!");
                     if (xq.Matches(creature)) { return true; }
+                }
+                else
+                {
+
+                    GLAPModLoader.DebugShowMessage(">>>>it's null.....");
                 }
             }
             return false;
@@ -123,6 +145,7 @@ namespace GhostloreAP
         
         public void Cleanup()
         {
+            _initializedQuestInstances = false;
             _quests.Clear();
             _questInstances.Clear();
         }
@@ -228,17 +251,25 @@ namespace GhostloreAP
 
             return s;
         }
+
+
+        public void FixAfterAwake()
+        {
+            QuestManager.instance.OnQuestProgress(null);
+        }
     }
 
-    [HarmonyPatch(typeof(QuestManager),"Awake")]
+    [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.OnQuestProgress))]
     public class QuestManagerPatcher
     {
-        static void Postfix(ref Quest[] ___quests, ref QuestInstance[] ___questInstances)
+        static bool Prefix(QuestInstance questInstance, ref Quest[] ___quests, ref QuestInstance[] ___questInstances)
         {
+            if (questInstance == null) { return false; }
+            if(QuestFactory.instance==null || QuestFactory.instance.CheckInitializedQuestInstances()) { return true; }
             GLAPModLoader.DebugShowMessage("we're in it to win it");
 
             List<Quest> _quests = new List<Quest>(___quests);
-            
+
             _quests = _quests.Concat(QuestFactory.instance.CreateAllAPQuests()).ToList();
             //GLAPModLoader.DebugShowMessage("changed quests from count "+___quests.Length+" to "+_quests.Count);
             ___quests = _quests.ToArray();
@@ -248,10 +279,10 @@ namespace GhostloreAP
                                  select c.MakeInstance()).ToArray<QuestInstance>();
 
             QuestFactory.instance.ClearAPQuestInstances();
-            foreach(QuestInstance q_ in ___questInstances)
+            foreach (QuestInstance q_ in ___questInstances)
             {
                 XQuest xQuest = ExtendedBindingManager.instance.GetExtended<XQuest>(q_.Quest);
-                if(xQuest != null)
+                if (xQuest != null)
                 {
                     ExtendedBindingManager.instance.RegisterAndSet<XQuestInstance>(q_, (xqi) =>
                     {
@@ -260,6 +291,8 @@ namespace GhostloreAP
                     QuestFactory.instance.AddAPQuestInstance(q_);
                 }
             }
+
+            return false;
 
         }
     }

@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Archipelago.MultiClient.Net;
 using WebSocketSharp;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Exceptions;
+using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 
 namespace GhostloreAP
@@ -29,6 +34,8 @@ namespace GhostloreAP
 
         private bool _connectionPacketReceieved = false;
 
+        
+        
         private string _seed;
 
         private LoginResult _loginResult;
@@ -52,7 +59,7 @@ namespace GhostloreAP
             {
                 Initialize();
                 _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems);
-                GLAPNotification.instance.DisplayMessage("");
+                
 
                 if (_session.Socket.Connected)
                 {
@@ -99,26 +106,71 @@ namespace GhostloreAP
         {
 
 
-            if (packet_ is ConnectedPacket)
+            switch (packet_)
             {
-                GLAPSettings.Set((packet_ as ConnectedPacket).SlotData);
+                case ConnectedPacket connectedPacket:
+                    OnPacketConnected(connectedPacket);
+                    _connectionPacketReceieved = true;
+                    break;
+                case PrintPacket printPacket:
+                    OnPacketPrint(printPacket);
+                    break;
+                case PrintJsonPacket printJsonPacket:
+                    OnPacketJsonPrint(printJsonPacket);
+                    break;
+                case RoomUpdatePacket roomUpdatePacket:
+                    OnPacketRoomUpdate(roomUpdatePacket);
+                    break;
             }
 
-            _connectionPacketReceieved = true;
+
+        }
+
+        private void OnPacketConnected(ConnectedPacket p)
+        {
+            GLAPSettings.Set(p.SlotData);
+        }
+
+        private void OnPacketPrint(PrintPacket p)
+        {
+            GLAPNotification.instance.DisplayLog(p.Text);
+        }
+
+        private void OnPacketJsonPrint(PrintJsonPacket p)
+        {
+            var text = new StringBuilder();
+            foreach(var d in p.Data)
+            {
+                switch (d.Type)
+                {
+                    case JsonMessagePartType.PlayerId:
+                        text.Append(GetPlayerName(int.Parse(d.Text)));
+                        break;
+                    case JsonMessagePartType.ItemId:
+                        text.Append(GetItemName(long.Parse(d.Text)));
+                        break;
+                    case JsonMessagePartType.LocationId:
+                        text.Append(GetLocationName(long.Parse(d.Text)));
+                        break;
+                    default:
+                        text.Append(d.Text);
+                        break;
+                }
+            }
+
+            GLAPNotification.instance.DisplayLog(text.ToString());
+        }
+
+        private void OnPacketRoomUpdate(RoomUpdatePacket p)
+        {
+
         }
 
         public void CompleteShopCheckAsync(int index)
         {
             _session.Locations.CompleteLocationChecksAsync((success) =>
             {
-                if (success)
-                {
-                    GLAPNotification.instance.DisplayLog("WE COMPLETED CHECK ON BUYING!");
-                }
-                else
-                {
-                    GLAPNotification.instance.DisplayLog("complete shop check failed...");
-                }
+
             }, GetShopLocation(index));
         }
 
@@ -126,14 +178,7 @@ namespace GhostloreAP
         {
             _session.Locations.CompleteLocationChecksAsync((success) =>
             {
-                if (success)
-                {
-                    GLAPNotification.instance.DisplayLog("WE COMPLETED CHECK ON "+locationName_.ToUpper()+"!");
-                }
-                else
-                {
-                    GLAPNotification.instance.DisplayLog("complete "+locationName_+" check failed...");
-                }
+                
             }, GetLocationFromName(locationName_));
             
         }
@@ -145,13 +190,17 @@ namespace GhostloreAP
 
         public long GetShopLocation(int index)
         {
-            GLAPNotification.instance.DisplayLog(string.Format(SHOPNAME, index + 1));
             return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format(SHOPNAME, index + 1));
         }
 
         public long GetLocationFromName(string name)
         {
             return _session.Locations.GetLocationIdFromName(GAMENAME, name);
+        }
+
+        public string GetLocationName(long id)
+        {
+            return _session.Locations.GetLocationNameFromId(id);
         }
 
         public List<long> GetAllShopLocations()

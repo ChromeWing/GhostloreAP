@@ -13,6 +13,12 @@ namespace GhostloreAP
         static void Prefix(CharacterContainer defender)
         {
             if (defender.IsDead) { return; }
+            if (defender == PlayerManager.instance.GetFirstPlayer()) { 
+                //this is us.
+                
+                return; 
+            }
+
             int killCount_ = 1;
             if((defender.State & CharacterContainerState.Champion) != CharacterContainerState.None)
             {
@@ -21,7 +27,7 @@ namespace GhostloreAP
             {
                 killCount_ = 5;
             }
-            GLAPEvents.OnCreatureKilled?.Invoke(defender.Creature,killCount_);
+            GLAPEvents.OnCreatureKilled?.Invoke(defender,killCount_);
         }
     }
 }

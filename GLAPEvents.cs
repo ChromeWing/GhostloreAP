@@ -8,7 +8,7 @@ namespace GhostloreAP
 {
     public static class GLAPEvents
     {
-        public static Action<Creature,int> OnCreatureKilled;
+        public static Action<CharacterContainer,int> OnCreatureKilled;
         public static Action<XQuestRequirement> OnKillQuestCompleted;
     }
 }

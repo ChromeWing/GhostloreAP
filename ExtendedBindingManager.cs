@@ -165,11 +165,13 @@ namespace GhostloreAP
             GLAPEvents.OnCreatureKilled -= OnCreatureKilled;
         }
 
-        private void OnCreatureKilled(Creature creature,int count_)
+        private void OnCreatureKilled(CharacterContainer character,int count_)
         {
-            if(target == creature)
+            if (MetRequirement()) { return; }
+            if(target == character.Creature)
             {
                 killCount+=count_;
+                GLAPNotification.instance.DisplayKillLog(character, killCount, killRequirement);
             }
         }
 
