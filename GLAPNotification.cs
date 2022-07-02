@@ -118,6 +118,17 @@ namespace GhostloreAP
                 await CreateUIElements();
                 await Task.Delay(500);
             }
+            while (TimeManager.instance.IsPaused())
+            {
+                await Task.Yield();
+            }
+            await Task.Delay(100);
+            while (TimeManager.instance.IsPaused())
+            {
+                await Task.Yield();
+            }
+
+
             levelText.text = message_.text;
             glyphsText.text = "";
             skillpointText.text = "";

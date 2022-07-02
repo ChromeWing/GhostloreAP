@@ -132,11 +132,14 @@ namespace GhostloreAP
 
     public class XQuestRequirement : ExtendedBinding
     {
+        public string locationName;
         public Creature target;
         public int killCount = 0;
         public int killRequirement = 10;
 
 
+
+        private bool alreadyCleared = false;
         private bool startedListener = false;
         
 
@@ -150,6 +153,10 @@ namespace GhostloreAP
             if (startedListener) { return; }
             GLAPEvents.OnCreatureKilled += OnCreatureKilled;
             //GLAPModLoader.DebugShowMessage("registered");
+            if (GLAPClient.instance.Connected && GLAPClient.instance.LocationAlreadyChecked(locationName))
+            {
+                alreadyCleared = true;
+            }
             startedListener = true;
         }
 
@@ -158,18 +165,19 @@ namespace GhostloreAP
             GLAPEvents.OnCreatureKilled -= OnCreatureKilled;
         }
 
-        private void OnCreatureKilled(Creature creature)
+        private void OnCreatureKilled(Creature creature,int count_)
         {
             if(target == creature)
             {
-                killCount++;
+                killCount+=count_;
             }
         }
 
         public bool MetRequirement()
         {
-            return killCount >= killRequirement;
+            return alreadyCleared || killCount >= killRequirement;
         }
+
     }
 
 

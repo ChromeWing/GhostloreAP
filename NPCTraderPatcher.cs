@@ -34,6 +34,8 @@ namespace GhostloreAP
 
         public string[] shopItemNames;
 
+        public static readonly string BRACELET_DESCRIPTION = "A strange bracelet that seems to link items between worlds...";
+
         public void Init()
         {
             referenceItem = ItemManager.instance.GetItemFromName("Sona");
@@ -80,7 +82,6 @@ namespace GhostloreAP
             Traverse.Create(newItem).Field("weaponSprite").SetValue(referenceItem.WeaponSprite);
             Traverse.Create(newItem).Field("tattoo").SetValue(referenceItem.Tattoo);
 
-            GLAPNotification.instance.DisplayMessage("AP_ShopSlot=" + slot);
 
             ExtendedBindingManager.instance.RegisterAndSet<XItemInstance>(itemInstance, (s) =>
             {
@@ -97,8 +98,9 @@ namespace GhostloreAP
             var traderCharacter = trader.ParentCharacter;
             for (int i = 0; i < 20; i++)
             {
+                if (!GLAPClient.instance.Connected) { continue; }
                 if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
-                AddItemToInventory(i, shopItemNames[i], "A strange bracelet that seems to link items between worlds...", GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
+                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
                 
             }
 
@@ -114,7 +116,10 @@ namespace GhostloreAP
         {
             for (int i = ___inventory.Items.Count - 1; i >= 0; i--)
             {
-                ___inventory.Items[i].DestroyItem();
+                if(___inventory.Items[i].Description == ItemFactory.BRACELET_DESCRIPTION)
+                {
+                    ___inventory.Items[i].DestroyItem();
+                }
             }
 
             ___lastRestockDay = ___lastRestockDay - 1;

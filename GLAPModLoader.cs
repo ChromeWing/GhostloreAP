@@ -11,8 +11,6 @@ using System.IO;
 4h * define an AP world for Ghostlore (almost done)
 5h * interface current systems into the AP client package
 2h * automatically clean up quest instances on detecting which checks were already done on loading into the game (since injected quests do not save)
-1h * sync the item shop to know the current state of which checks were already purchased.
-1h * fix the item shop erasing the potions etc.
 2h * detect different goals reached
 4h * complete the recipe system in this mod (loading currently unlocked recipes in the restaurant menu)
 6h * add Chthonite and Astralite as checks
@@ -45,13 +43,14 @@ namespace GhostloreAP
         {
             modInfo = ModManager.Mods.Find((mod) => mod.Name == "Archipelago");
             singletons = new List<IGLAPSingleton>();
-            InitSingletons();
+            GLAPNotification.EnsureExists();
+            singletons.Add(GLAPNotification.instance);
+
             DebugShowMessage("Huh?");
 
             DebugShowMessage("Huh??");
 
-            harmony = new Harmony("com.chromewing.ghostlore-archipelago");
-            harmony.PatchAll();
+            
 
             DebugShowMessage("Huh????");
         }
@@ -63,21 +62,18 @@ namespace GhostloreAP
             ExtendedBindingManager.EnsureExists();
             GLAPLocationManager.EnsureExists();
             GLAPItemGiver.EnsureExists();
-            GLAPNotification.EnsureExists();
-            GLAPClient.EnsureExists();
 
             singletons.Add(ExtendedBindingManager.instance);
             singletons.Add(GLAPLocationManager.instance);
             singletons.Add(GLAPItemGiver.instance);
             singletons.Add(QuestFactory.instance);
             singletons.Add(CreatureCatalogLogger.instance);
-            singletons.Add(GLAPNotification.instance);
             singletons.Add(ItemFactory.instance);
-            singletons.Add(GLAPClient.instance);
         }
 
         private void DisposeSingletons()
         {
+            if(singletons == null) { return; }
             foreach(var singleton in singletons)
             {
                 if(singleton != null)
@@ -88,40 +84,51 @@ namespace GhostloreAP
 
         public void OnGameLoaded(LoadMode mode)
         {
+            GameLoadedStart();
+
+        }
+
+        public async void GameLoadedStart()
+        {
+            GLAPClient.EnsureExists();
+            singletons.Add(GLAPClient.instance);
+            await GLAPClient.instance.Connect("ChromeWingGL");
+
+            InitSingletons();
+
+            ItemFactory.instance.CacheShopItemNames();
             GLAPLocationManager.instance.StartListeners();
             GLAPNotification.instance.Init();
-            WelcomePlayer();
-            GLAPClient.instance.Connect("ChromeWingGL");
 
+            harmony = new Harmony("com.chromewing.ghostlore-archipelago");
+            harmony.PatchAll();
+
+            ReloadQuests();
+        }
+
+        private void ReloadQuests()
+        {
+            SaveGame.GetSaveGame().Managers.Find((m) => { return m.GetType() == typeof(QuestManager.Data); }).Deserialize();
         }
 
         public void OnGameUnloaded()
         {
-            GLAPLocationManager.instance.ShutdownListeners();
-            Shutdown();
+            if(GLAPLocationManager.instance != null)
+            {
+                GLAPLocationManager.instance.ShutdownListeners();
+            }
         }
 
         public void OnReleased()
         {
-            harmony.UnpatchAll();
+            if(harmony != null)
+            {
+                harmony.UnpatchAll();
+            }
 
             DisposeSingletons();
-            Shutdown();
         }
 
-        private void Shutdown()
-        {
-
-        }
-
-        private async void WelcomePlayer()
-        {
-           
-            await DisplayMessageAsyncRoutine("Welcome to Archipelago!");
-
-
-
-        }
 
         public static void DebugShowMessage(string msg_,bool logIt_=true)
         {
@@ -139,21 +146,6 @@ namespace GhostloreAP
 
             debugMsg.DisplayMessage(msg_); 
         }
-
-        private async Task DisplayMessageAsyncRoutine(string msg_)
-        {
-            await Task.Delay(1000);
-            while (TimeManager.instance.IsPaused())
-            {
-                await Task.Yield();
-            }
-            await Task.Delay(500);
-            GLAPNotification.instance.DisplayMessage("Welcome!");
-
-
-
-        }
-
 
         public static void ReportHierarchy()
         {

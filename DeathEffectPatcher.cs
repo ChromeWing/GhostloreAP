@@ -13,7 +13,15 @@ namespace GhostloreAP
         static void Prefix(CharacterContainer defender)
         {
             if (defender.IsDead) { return; }
-            GLAPEvents.OnCreatureKilled?.Invoke(defender.Creature);
+            int killCount_ = 1;
+            if((defender.State & CharacterContainerState.Champion) != CharacterContainerState.None)
+            {
+                killCount_ = 3;
+            }else if ((defender.State & CharacterContainerState.Elite) != CharacterContainerState.None)
+            {
+                killCount_ = 5;
+            }
+            GLAPEvents.OnCreatureKilled?.Invoke(defender.Creature,killCount_);
         }
     }
 }

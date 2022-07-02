@@ -21,7 +21,7 @@ namespace GhostloreAP
                 if (__result==true)
                 {
                     GLAPModLoader.DebugShowMessage("ABOUT TO FIRE EVENT FOR COMPLETE QUEST!!");
-                    GLAPEvents.OnKillQuestCompleted?.Invoke(questInstance);
+                    GLAPEvents.OnKillQuestCompleted?.Invoke(ex);
                 }
             }
             

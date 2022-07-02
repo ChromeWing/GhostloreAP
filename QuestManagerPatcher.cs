@@ -169,7 +169,7 @@ namespace GhostloreAP
         {
             if (i < 0)
             {
-                return ConstructStage(string.Format("Conquered {0}!", creature_.CreatureDisplayName), creature_, 9999999);
+                return ConstructStage(string.Format("Conquered {0}!", creature_.CreatureDisplayName),"", creature_, 9999999);
             }
 
             int requirement_ = GetQuestWorkload(creature_,workload_, i);
@@ -193,10 +193,15 @@ namespace GhostloreAP
                 killText = "Defeat";
             }
 
-            return ConstructStage(string.Format("{0} {1} {2}", killText, requirement_, creature_.CreatureDisplayName), creature_,requirement_);
+            return ConstructStage(
+                string.Format("{0} {1} {2}", killText, requirement_, creature_.CreatureDisplayName), 
+                string.Format("{0} {1}", killText, creature_.CreatureDisplayName), 
+                creature_,
+                requirement_
+            );
         }
 
-        private QuestStage ConstructStage(string name_, Creature creature_, int requirement_)
+        private QuestStage ConstructStage(string name_, string locationName_, Creature creature_, int requirement_)
         {
             QuestStage s = new QuestStage();
             Traverse.Create(s).Field("stageName").SetValue(name_);
@@ -206,9 +211,11 @@ namespace GhostloreAP
             QuestRequirement r = new QuestRequirement();
             ExtendedBindingManager.instance.RegisterAndSet<XQuestRequirement>(r, (xr) =>
             {
+                xr.locationName = locationName_;
                 xr.target = creature_;
                 xr.killRequirement = requirement_;
                 xr.killCount = 0;
+                
             });
             Traverse.Create(r).Field("requirementType").SetValue(QuestRequirementType.MapProgress);
             Traverse.Create(r).Field("location").SetValue(MapManager.instance.DefaultTown);

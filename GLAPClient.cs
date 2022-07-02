@@ -6,31 +6,105 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Archipelago.MultiClient.Net;
 using WebSocketSharp;
+using Archipelago.MultiClient.Net.Packets;
 
 namespace GhostloreAP
 {
     public class GLAPClient : Singleton<GLAPClient>, IGLAPSingleton
     {
 
+        public static GLAPClient tryInstance { get
+            {
+                if(instance._session == null || !instance._session.Socket.Connected) { return null; }
+                return instance;
+            }
+        }
+
+        public bool Connected { get
+            {
+                return _session != null && _session.Socket.Connected;
+            } }
+
         private ArchipelagoSession _session;
+
+        private bool _connectionPacketReceieved = false;
+
+        private string _seed;
+
+        private LoginResult _loginResult;
 
         private readonly string GAMENAME = "Ghostlore";
         private readonly string SHOPNAME = "Link Bracelet #{0}";
 
         public void Cleanup()
         {
-
+            _connectionPacketReceieved = false;
+            _session = null;
+            _loginResult = null;
         }
 
-        public void Connect(string slotName_,string ip_="localhost")
+        public async Task Connect(string slotName_,string ip_="localhost")
         {
 
             _session = ArchipelagoSessionFactory.CreateSession(ip_, 38281);
 
-            _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems);
-            GLAPNotification.instance.DisplayMessage(slotName_ + " Connected to Archipelago!");
+            try
+            {
+                Initialize();
+                _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems);
+                GLAPNotification.instance.DisplayMessage("");
 
-            ItemFactory.instance.CacheShopItemNames();
+                if (_session.Socket.Connected)
+                {
+                    GLAPNotification.instance.DisplayMessage(slotName_ + " connected to Archipelago!");
+                    GLAPNotification.instance.DisplayMessage("Welcome!");
+                    while (!_connectionPacketReceieved)
+                    {
+                        await Task.Yield();
+                    }
+
+                }
+                else
+                {
+                    GLAPNotification.instance.DisplayMessage(slotName_ + " failed to connect to Archipelago...");
+                    GLAPNotification.instance.DisplayMessage("Please visit the Steam Workshop page for this mod for troubleshooting.");
+                }
+
+            }
+            catch
+            {
+                Disconnect();
+            }
+
+        }
+
+        public void Disconnect()
+        {
+            CloseConnection();
+        }
+
+        private void Initialize()
+        {
+            _session.Socket.PacketReceived += OnPacketReceived;
+        }
+
+        private void CloseConnection()
+        {
+
+            GLAPModLoader.DebugShowMessage("CLOSE CONNECTION!");
+            _session.Socket.PacketReceived -= OnPacketReceived;
+        }
+
+        private void OnPacketReceived(ArchipelagoPacketBase packet_)
+        {
+
+
+            if (packet_ is ConnectedPacket)
+            {
+                GLAPSettings.Set((packet_ as ConnectedPacket).SlotData);
+            }
+
+            _connectionPacketReceieved = true;
         }
 
         public void CompleteShopCheckAsync(int index)
@@ -48,6 +122,22 @@ namespace GhostloreAP
             }, GetShopLocation(index));
         }
 
+        public void CompleteKillQuestAsync(string locationName_)
+        {
+            _session.Locations.CompleteLocationChecksAsync((success) =>
+            {
+                if (success)
+                {
+                    GLAPNotification.instance.DisplayLog("WE COMPLETED CHECK ON "+locationName_.ToUpper()+"!");
+                }
+                else
+                {
+                    GLAPNotification.instance.DisplayLog("complete "+locationName_+" check failed...");
+                }
+            }, GetLocationFromName(locationName_));
+            
+        }
+
         public bool ShopAlreadyChecked(int index)
         {
             return LocationAlreadyChecked(GetShopLocation(index));
@@ -57,6 +147,11 @@ namespace GhostloreAP
         {
             GLAPNotification.instance.DisplayLog(string.Format(SHOPNAME, index + 1));
             return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format(SHOPNAME, index + 1));
+        }
+
+        public long GetLocationFromName(string name)
+        {
+            return _session.Locations.GetLocationIdFromName(GAMENAME, name);
         }
 
         public List<long> GetAllShopLocations()
@@ -95,6 +190,11 @@ namespace GhostloreAP
         public bool LocationAlreadyChecked(long id)
         {
             return _session.Locations.AllLocationsChecked.Contains(id);
+        }
+
+        public bool LocationAlreadyChecked(string name_)
+        {
+            return _session.Locations.AllLocationsChecked.Contains(GetLocationFromName(name_));
         }
 
         private void DebugLog(string val_)
