@@ -20,7 +20,7 @@ namespace GhostloreAP
 
         public static GLAPClient tryInstance { get
             {
-                if(instance._session == null || !instance._session.Socket.Connected) { return null; }
+                if (instance._session == null || !instance._session.Socket.Connected) { return null; }
                 return instance;
             }
         }
@@ -34,8 +34,8 @@ namespace GhostloreAP
 
         private bool _connectionPacketReceieved = false;
 
-        
-        
+
+
         private string _seed;
 
         private LoginResult _loginResult;
@@ -50,7 +50,7 @@ namespace GhostloreAP
             _loginResult = null;
         }
 
-        public async Task Connect(string slotName_,string ip_="localhost")
+        public async Task Connect(string slotName_, string ip_ = "localhost")
         {
 
             _session = ArchipelagoSessionFactory.CreateSession(ip_, 38281);
@@ -59,7 +59,7 @@ namespace GhostloreAP
             {
                 Initialize();
                 _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems);
-                
+
 
                 if (_session.Socket.Connected)
                 {
@@ -83,6 +83,11 @@ namespace GhostloreAP
                 Disconnect();
             }
 
+        }
+
+        public void ListenToItems()
+        {
+            _session.Items.ItemReceived += OnItemReceieved;
         }
 
         public void Disconnect()
@@ -126,6 +131,16 @@ namespace GhostloreAP
 
         }
 
+        private void OnItemReceieved(ReceivedItemsHelper helper)
+        {
+            GLAPLocationManager.instance.RefreshLocationCountCleared();
+            var item = helper.DequeueItem();
+            GLAPNotification.instance.DisplayMessage(GetReceivedItemMessage(item.Item), () =>
+            {
+                GLAPItemGiver.instance.GiveItem(item.Item);
+            });
+        }
+
         private void OnPacketConnected(ConnectedPacket p)
         {
             GLAPSettings.Set(p.SlotData);
@@ -139,7 +154,7 @@ namespace GhostloreAP
         private void OnPacketJsonPrint(PrintJsonPacket p)
         {
             var text = new StringBuilder();
-            foreach(var d in p.Data)
+            foreach (var d in p.Data)
             {
                 switch (d.Type)
                 {
@@ -178,9 +193,9 @@ namespace GhostloreAP
         {
             _session.Locations.CompleteLocationChecksAsync((success) =>
             {
-                
+
             }, GetLocationFromName(locationName_));
-            
+
         }
 
         public bool ShopAlreadyChecked(int index)
@@ -203,6 +218,9 @@ namespace GhostloreAP
             return _session.Locations.GetLocationNameFromId(id);
         }
 
+        public string GetReceivedItemMessage(int id_) => GLAPItemGiver.instance.GetItemReceievedMessage(id_);
+        
+
         public List<long> GetAllShopLocations()
         {
             List<long> shop_ = new List<long>();
@@ -224,6 +242,16 @@ namespace GhostloreAP
                     cb(i,entryName);
                 }
             }, false, GetAllShopLocations().ToArray());
+        }
+
+        public int GetItemCountReceived(int id_)
+        {
+            return _session.Items.AllItemsReceived.Where(i=>i.Item==id_).Count();
+        }
+
+        public int GetLootItemCountReceived()
+        {
+            return _session.Items.AllItemsReceived.Where(i => GetItemName(i.Item).Contains("Loot")).Count();
         }
 
         public string GetPlayerName(int index)

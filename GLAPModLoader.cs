@@ -101,12 +101,17 @@ namespace GhostloreAP
             harmony = new Harmony("com.chromewing.ghostlore-archipelago");
             harmony.PatchAll();
 
-            ReloadQuests();
+            await ReloadQuests();
 
+            GLAPClient.tryInstance?.ListenToItems();
         }
 
-        private void ReloadQuests()
+        private async Task ReloadQuests()
         {
+            while (TimeManager.instance.IsPaused())
+            {
+                await Task.Yield();
+            }
             SaveGame.GetSaveGame().Managers.Find((m) => { return m.GetType() == typeof(QuestManager.Data); }).Deserialize();
             QuestFactory.instance.FixAfterAwake();
         }

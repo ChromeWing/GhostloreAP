@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
+using UnityEngine;
 
 namespace GhostloreAP
 {
@@ -100,6 +101,8 @@ namespace GhostloreAP
 
         private bool _initializedQuestInstances = false;
 
+        private GameLocation defaultLocation;
+
         public bool CheckInitializedQuestInstances()
         {
             if (!_initializedQuestInstances)
@@ -152,6 +155,7 @@ namespace GhostloreAP
 
         public List<Quest> CreateAllAPQuests()
         {
+            if (defaultLocation==null) { CreateDefaultLocation(); }
             if(_quests!=null && _quests.Count > 0) { return _quests; }
             List<Quest> allAPQuests = new List<Quest>();
             foreach(var creature in CreatureCatalogLogger.instance.creatures)
@@ -160,6 +164,22 @@ namespace GhostloreAP
             }
             _quests = allAPQuests;
             return allAPQuests;
+        }
+
+        private void CreateDefaultLocation()
+        {
+            defaultLocation = new GameLocation();
+            Traverse.Create(defaultLocation).Field("gameLocationName").SetValue("FakeLocation");
+            Traverse.Create(defaultLocation).Field("attributes").SetValue(GameLocationAttributes.None);
+            Traverse.Create(defaultLocation).Field("sceneName").SetValue("FakeLocation");
+            Traverse.Create(defaultLocation).Field("maxObjectives").SetValue(0);
+            Traverse.Create(defaultLocation).Field("creatures").SetValue(new MapCreatureSpawn[0]);
+            Traverse.Create(defaultLocation).Field("defaultPortalPosition").SetValue(Vector3.zero);
+            Traverse.Create(defaultLocation).Field("questRequirement").SetValue(null);
+            Traverse.Create(defaultLocation).Field("backgroundMusic").SetValue("");
+            Traverse.Create(defaultLocation).Field("ambientMusic").SetValue("");
+            Traverse.Create(defaultLocation).Field("startingLevel").SetValue(0);
+            Traverse.Create(defaultLocation).Field("musicOverrides").SetValue(new GameLocationMusicOverride[0]);
         }
 
         public Quest CreateAPQuest(string questName_,Creature creature_,MonsterWorkload workload_)
@@ -241,7 +261,8 @@ namespace GhostloreAP
                 
             });
             Traverse.Create(r).Field("requirementType").SetValue(QuestRequirementType.MapProgress);
-            Traverse.Create(r).Field("location").SetValue(MapManager.instance.DefaultTown);
+
+            Traverse.Create(r).Field("location").SetValue(defaultLocation);
             Traverse.Create(r).Field("value").SetValue("");
             _requirements.Add(r);
 
@@ -258,6 +279,22 @@ namespace GhostloreAP
             QuestManager.instance.OnQuestProgress(null);
         }
     }
+
+    /*
+    [HarmonyPatch(typeof(MapManager),nameof(MapManager.IsLocationCompleted))]
+    public class MapManagerPatcher
+    {
+        static bool Prefix(GameLocation location, ref bool __result)
+        {
+            if(location == null)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+    }
+    */
 
     [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.OnQuestProgress))]
     public class QuestManagerPatcher

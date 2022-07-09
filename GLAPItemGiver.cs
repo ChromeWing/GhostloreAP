@@ -11,6 +11,12 @@ namespace GhostloreAP
     {
         private bool active = true;
 
+        private readonly int minLootId = 10133000;
+        private readonly int maxLootId = 10133024;
+
+
+        private Dictionary<int, Creature> creatures;
+
         protected override void Awake()
         {
             base.Awake();
@@ -21,6 +27,13 @@ namespace GhostloreAP
 
         private void Init()
         {
+            creatures = new Dictionary<int, Creature>();
+            for(int i=0;i< CreatureCatalogLogger.instance.validCreatureNames.Length;i++)
+            {
+                var name_ = CreatureCatalogLogger.instance.validCreatureNames[i];
+                creatures.Add(i+minLootId, CreatureCatalogLogger.instance.GetCreature(name_));
+            }
+
             active = true;
         }
 
@@ -30,6 +43,40 @@ namespace GhostloreAP
             if (this == null) { return; }
             GameObject.Destroy(this.gameObject);
         }
+
+        public void GiveItem(int item_)
+        {
+            switch (item_)
+            {
+                case var i when i>=minLootId && i<=maxLootId:
+                    var creature_ = creatures[i];
+                    DropItemsFrom(
+                        creature_, 
+                        QuestFactory.GetQuestWorkload(
+                            creature_, 
+                            GLAPSettings.workload, 
+                            GLAPClient.instance.GetItemCountReceived(i) - 1
+                        ),
+                        GLAPLocationManager.instance.MinLevel,
+                        GLAPLocationManager.instance.MaxLevel
+                    );
+                    break;
+            }
+        }
+
+
+        public string GetItemReceievedMessage(int item_)
+        {
+            switch (item_)
+            {
+                case var i when i >= minLootId && i <= maxLootId:
+                    var creature_ = creatures[i];
+                    return string.Format("Loot from {0} showers around you!", creature_.CreatureDisplayName);
+                    
+            }
+            return "Receieved item that we don't support yet :(";
+        }
+
 
         public async void DropItemsFrom(Creature creature,int count,float minLevel,float maxLevel)
         {

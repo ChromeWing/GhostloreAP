@@ -35,29 +35,32 @@ namespace GhostloreAP
         public CreatureCatalog catalog;
 
 
-        private string[] validCreatureNames = {
+        public string[] validCreatureNames = {
             "Ahool",
             "Babi Ngepet",
-            "Ice Jinn",
-            "Thunder Jinn",
-            "Fire Jinn",
+            "Cicak Sorceress",
             "E-Gui",
             "Gui-Kia",
             "Hantu Raya",
-            "Hantu Tinggi",
             "Jenglot",
             "Jiang-Shi",
             "Komodo Wizard",
-            "Salamancer",
+            "Monitor Wizard",
             "Orang Minyak",
             "Penanggal",
             "Pocong",
             "Pontianak Tree",
             "Preta",
-            "Rafflesia",
             "Rakshasa",
+            "Salamancer",
+            "Toyol",
             "Mogui Summoner",
-            "Toyol"
+            "Rafflesia",
+            "Hantu Raya",
+            "Ice Jinn",
+            "Thunder Jinn",
+            "Fire Jinn",
+            "Hantu Tinggi"
         };
 
         public CreatureCatalogLogger()
@@ -126,6 +129,19 @@ namespace GhostloreAP
             }
             creatures = creatures_;
             return creatures_;
+        }
+
+        public Creature GetCreature(string name_)
+        {
+            var monsters = CreatureManager.instance.CreaturePrefabs;
+            foreach(Creature m in monsters.Keys)
+            {
+                if(m.CreatureDisplayName == name_)
+                {
+                    return m;
+                }
+            }
+            return null;
         }
 
         public void Cleanup()

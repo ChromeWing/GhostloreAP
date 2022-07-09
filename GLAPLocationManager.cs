@@ -21,11 +21,11 @@ namespace GhostloreAP
 
         private bool registeredQuestEvents = false;
 
-        private int MinLevel
+        public int MinLevel
         {
             get { return Math.Max((int)Mathf.Lerp(totalMinLevel, totalMaxLevel, ((float)locationsCleared) / totalLocationCount)-10, totalMinLevel); }
         }
-        private int MaxLevel
+        public int MaxLevel
         {
             get { return (int)(Mathf.Lerp(totalMinLevel, totalMaxLevel, ((float)locationsCleared) / totalLocationCount)); }
         }
@@ -46,7 +46,14 @@ namespace GhostloreAP
             QuestFactory.instance.CreateAllAPQuests();
             RandomizeLocations();
 
+            RefreshLocationCountCleared();
             
+            
+        }
+
+        public void RefreshLocationCountCleared()
+        {
+            locationsCleared = GLAPClient.instance.GetLootItemCountReceived();
         }
 
         public async void StartListeners()
@@ -65,18 +72,12 @@ namespace GhostloreAP
 
         private void CreateLocations()
         {
-            Creature shopPlaceholder = null;
             foreach(var c in CreatureCatalogLogger.instance.creatures)
             {
-                if (shopPlaceholder == null) { shopPlaceholder = c; }
                 for(int i = 0; i < GLAPSettings.killQuestsPerMonster; i++)
                 locations.Add(new GLAPLocation(c, QuestFactory.GetQuestWorkload(c,GLAPSettings.workload,i)));
             }
 
-            for(int i = 0; i < 20; i++)
-            {
-                locations.Add(new GLAPLocation(shopPlaceholder, 10));
-            }
 
             locationsCleared = 0;
             totalLocationCount = locations.Count;
