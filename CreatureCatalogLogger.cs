@@ -36,30 +36,28 @@ namespace GhostloreAP
 
 
         public string[] validCreatureNames = {
-            "Ahool",
+            "Athol",
             "Babi Ngepet",
-            "Cicak Sorceress",
-            "E-Gui",
-            "Gui-Kia",
-            "Hantu Raya",
+            "Ergui",
+            "Guikia",
             "Jenglot",
-            "Jiang-Shi",
-            "Komodo Wizard",
-            "Monitor Wizard",
+            "Jiang Shi",
+            "Komodo Wizard Lightning",
+            "Komodo Wizard Poison",
             "Orang Minyak",
             "Penanggal",
             "Pocong",
             "Pontianak Tree",
             "Preta",
             "Rakshasa",
-            "Salamancer",
+            "Komodo Wizard",
             "Toyol",
-            "Mogui Summoner",
+            "Summoner",
             "Rafflesia",
             "Hantu Raya",
-            "Ice Jinn",
-            "Thunder Jinn",
-            "Fire Jinn",
+            "Djinn Ice",
+            "Djinn Lightning",
+            "Djinn",
             "Hantu Tinggi"
         };
 
@@ -69,7 +67,7 @@ namespace GhostloreAP
 
         public void Init()
         {
-            //GetLootableCreatures();
+            GetLootableCreatures();
             GetApprovedCreatures();
             if (File.Exists(CatalogPath))
             {
@@ -85,7 +83,7 @@ namespace GhostloreAP
         {
             CreatureCatalog creatureCatalog = new CreatureCatalog
             {
-                Creatures = (from c in creatures select c.CreatureDisplayName).ToArray()
+                Creatures = (from c in lootableCreatures select (string.Format("{0}|{1}",c.CreatureName,c.CreatureDisplayName))).ToArray()
             };
             File.WriteAllText(CatalogPath, JsonConvert.SerializeObject(creatureCatalog, Formatting.Indented));
             return creatureCatalog;
@@ -120,7 +118,7 @@ namespace GhostloreAP
                 var mName = validCreatureNames[c];
                 foreach(Creature m in monsters.Keys)
                 {
-                    if (m.CreatureDisplayName == mName)
+                    if (m.CreatureName == mName)
                     {
                         creatures_.Add(m);
                         break;
@@ -136,7 +134,7 @@ namespace GhostloreAP
             var monsters = CreatureManager.instance.CreaturePrefabs;
             foreach(Creature m in monsters.Keys)
             {
-                if(m.CreatureDisplayName == name_)
+                if(m.CreatureName == name_)
                 {
                     return m;
                 }

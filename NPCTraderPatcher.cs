@@ -112,22 +112,19 @@ namespace GhostloreAP
     [HarmonyPatch(typeof(NPCTrader),"CheckInventory")]
     public class NPCTraderPatcher
     {
-        static void Postfix(NPCTrader __instance,ref int ___lastRestockDay, ref Inventory ___inventory)
-        {
-            for (int i = ___inventory.Items.Count - 1; i >= 0; i--)
-            {
-                if(___inventory.Items[i].Description == ItemFactory.BRACELET_DESCRIPTION)
-                {
-                    ___inventory.Items[i].DestroyItem();
-                }
-            }
 
+        static bool Prefix(ref int ___lastRestockDay)
+        {
             ___lastRestockDay = ___lastRestockDay - 1;
             if (___lastRestockDay < 0)
             {
                 ___lastRestockDay = 365;
             }
-
+            return true;
+        }
+        static void Postfix(NPCTrader __instance)
+        {
+            
             ItemFactory.instance.SetupArchipelagoShop(__instance);
 
         }

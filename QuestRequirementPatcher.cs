@@ -20,7 +20,7 @@ namespace GhostloreAP
                 __result = ex.MetRequirement();
                 if (__result==true)
                 {
-                    GLAPModLoader.DebugShowMessage("ABOUT TO FIRE EVENT FOR COMPLETE QUEST!!");
+                    //GLAPModLoader.DebugShowMessage("ABOUT TO FIRE EVENT FOR COMPLETE QUEST!!");
                     GLAPEvents.OnKillQuestCompleted?.Invoke(ex);
                 }
             }

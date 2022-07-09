@@ -50,21 +50,23 @@ namespace GhostloreAP
         private static float GetCreatureWorkloadMultiplier(Creature creature_)
         {
             //multiply bosses by zero to ensure they are only a 1-kill quest (workload will round it up to 1 automatically)
-            switch (creature_.CreatureDisplayName)
+            switch (creature_.CreatureName)
             {
                 //bosses:
-                case "Ice Jinn":
+                case "Djinn Ice":
                     return 0;
-                case "Thunder Jinn":
+                case "Djinn Lightning":
                     return 0;
-                case "Fire Jinn":
+                case "Djinn":
+                    return 0;
+                case "Hantu Tinggi":
                     return 0;
                 case "Rafflesia":
                     return 0;
-                case "Mogui Summoner":
+                case "Summoner":
                     return 0;
                 //regular monsters:
-                case "Gui-Kia":
+                case "Guikia":
                     return 1.5f;
                 case "Pontianak Tree":
                     return 0.5f;
@@ -75,19 +77,21 @@ namespace GhostloreAP
 
         public static int GetQuestCountForCreature(Creature creature_)
         {
-            switch (creature_.CreatureDisplayName)
+            switch (creature_.CreatureName)
             {
-                case "Ice Jinn":
+                case "Djinn Ice":
                     return 1;
-                case "Thunder Jinn":
+                case "Djinn Lightning":
                     return 1;
-                case "Fire Jinn":
+                case "Djinn":
                     return 1;
                 case "Rafflesia":
                     return 1;
-                case "Mogui Summoner":
+                case "Summoner":
                     return 1;
-                    
+                case "Hantu Tinggi":
+                    return 1;
+
             }
 
             return GLAPSettings.killQuestsPerMonster;
@@ -260,9 +264,9 @@ namespace GhostloreAP
                 xr.killCount = 0;
                 
             });
-            Traverse.Create(r).Field("requirementType").SetValue(QuestRequirementType.MapProgress);
+            Traverse.Create(r).Field("requirementType").SetValue(QuestRequirementType.HasQuestItem);
 
-            Traverse.Create(r).Field("location").SetValue(defaultLocation);
+            Traverse.Create(r).Field("location").SetValue(null);
             Traverse.Create(r).Field("value").SetValue("");
             _requirements.Add(r);
 
@@ -280,9 +284,30 @@ namespace GhostloreAP
         }
     }
 
-    /*
-    [HarmonyPatch(typeof(MapManager),nameof(MapManager.IsLocationCompleted))]
-    public class MapManagerPatcher
+    
+    [HarmonyPatch(typeof(MapManager),nameof(MapManager.GetTown))]
+    public class NullQuestLocationPatcher1
+    {
+        static void Postfix(GameLocation ___defaultTown, ref GameLocation __result)
+        {
+            if(__result == null)
+            {
+                QuestInstance qi_ = Singleton<QuestManager>.instance.ActiveQuests.Where(q => (q != null && q.Quest != null && q.Quest.Town != null)).FirstOrDefault<QuestInstance>();
+                if(qi_ != null)
+                {
+                    __result = qi_.Quest.Town;
+                }
+            }
+            if(__result == null)
+            {
+                __result = ___defaultTown;
+            }
+
+        }
+    }
+
+    [HarmonyPatch(typeof(MapManager), nameof(MapManager.IsLocationCompleted))]
+    public class NullQuestLocationPatcher2
     {
         static bool Prefix(GameLocation location, ref bool __result)
         {
@@ -294,7 +319,8 @@ namespace GhostloreAP
             return true;
         }
     }
-    */
+
+
 
     [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.OnQuestProgress))]
     public class QuestManagerPatcher

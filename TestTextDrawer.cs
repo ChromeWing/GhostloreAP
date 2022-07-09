@@ -24,7 +24,7 @@ namespace GhostloreAP
 
         void OnGUI()
         {
-            GUI.Label(new Rect(10, 10, 400, 400), message);
+            GUI.Label(new Rect(10, 10, 400, 800), message);
         }
     }
 }

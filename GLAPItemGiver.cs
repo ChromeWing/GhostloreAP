@@ -12,7 +12,7 @@ namespace GhostloreAP
         private bool active = true;
 
         private readonly int minLootId = 10133000;
-        private readonly int maxLootId = 10133024;
+        private readonly int maxLootId = 10133022;
 
 
         private Dictionary<int, Creature> creatures;
@@ -32,6 +32,11 @@ namespace GhostloreAP
             {
                 var name_ = CreatureCatalogLogger.instance.validCreatureNames[i];
                 creatures.Add(i+minLootId, CreatureCatalogLogger.instance.GetCreature(name_));
+            }
+
+            foreach(var k in creatures.Keys)
+            {
+                GLAPModLoader.DebugShowMessage(k + ":" + creatures[k]);
             }
 
             active = true;
@@ -67,6 +72,7 @@ namespace GhostloreAP
 
         public string GetItemReceievedMessage(int item_)
         {
+            GLAPNotification.instance.DisplayLog("item is: " + item_);
             switch (item_)
             {
                 case var i when i >= minLootId && i <= maxLootId:
