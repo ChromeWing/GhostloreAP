@@ -30,6 +30,27 @@ namespace GhostloreAP
                 return _session != null && _session.Socket.Connected;
             } }
 
+        public int Seed { get
+            {
+                if (!Connected) { return 0; }
+                return ConvertSeedToInt(_session.RoomState.Seed);
+            } }
+
+        public bool SessionMade { get
+            {
+                return _session != null;
+            } }
+
+        private int ConvertSeedToInt(string seed_)
+        {
+            int result = 0;
+            foreach(char ch in seed_)
+            {
+                result = (result * 256 + (int)ch) % int.MaxValue;
+            }
+            return result;
+        }
+
         private ArchipelagoSession _session;
 
         private bool _connectionPacketReceieved = false;
@@ -50,39 +71,85 @@ namespace GhostloreAP
             _loginResult = null;
         }
 
-        public async Task Connect(string slotName_, string ip_ = "localhost")
+        public async Task Connect(string slotName_, string ip_ = "localhost", int port_ = 38281, string password_="", System.Action onSuccess_=null, System.Action onFail_=null)
         {
-
-            _session = ArchipelagoSessionFactory.CreateSession(ip_, 38281);
+            GLAPModLoader.DebugShowMessage("stage1");
+            GLAPModLoader.SaveLog();
+            _session = ArchipelagoSessionFactory.CreateSession(ip_, port_);
+            
+            
+            if (password_ == "")
+            {
+                password_ = null;
+            }
 
             try
             {
+                GLAPModLoader.DebugShowMessage("stage2");
                 Initialize();
-                _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems);
+                GLAPModLoader.DebugShowMessage("stage3");
+                GLAPModLoader.SaveLog();
+                _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems,null,null,password_);
 
-
+                GLAPModLoader.DebugShowMessage("stage4");
+                GLAPModLoader.SaveLog();
+                await Task.Yield();
+                
                 if (_session.Socket.Connected)
                 {
+                    GLAPModLoader.DebugShowMessage("stage5");
+                    GLAPModLoader.SaveLog();
                     GLAPNotification.instance.DisplayMessage(slotName_ + " connected to Archipelago!");
                     GLAPNotification.instance.DisplayMessage("Welcome!");
-                    while (!_connectionPacketReceieved)
+                    var timeout_ = Time.fixedTime;
+                    while (!_connectionPacketReceieved && Time.fixedTime-timeout_<5)
                     {
+                        GLAPModLoader.DebugShowMessage("stage9");
                         await Task.Yield();
                     }
+                    if(Time.fixedTime-timeout_ >= 5)
+                    {
+                        _session = null;
+                        onFail_?.Invoke();
+                        return;
+                    }
+                    GLAPModLoader.DebugShowMessage("stage6");
+                    GLAPModLoader.SaveLog();
+                    onSuccess_?.Invoke();
+                    return;
 
                 }
                 else
                 {
+                    GLAPModLoader.DebugShowMessage("stage7");
+                    GLAPModLoader.SaveLog();
                     GLAPNotification.instance.DisplayMessage(slotName_ + " failed to connect to Archipelago...");
                     GLAPNotification.instance.DisplayMessage("Please visit the Steam Workshop page for this mod for troubleshooting.");
                 }
-
+                
             }
             catch
             {
+                GLAPModLoader.DebugShowMessage("stage8");
+                GLAPModLoader.SaveLog();
                 Disconnect();
             }
 
+            onFail_?.Invoke();
+            
+        }
+
+        public async Task WaitTillConnectionIsMade()
+        {
+            var timeout_ = Time.fixedTime;
+            while (!_connectionPacketReceieved && Time.fixedTime - timeout_ < 5)
+            {
+                await Task.Yield();
+            }
+            if (Time.fixedTime - timeout_ >= 5)
+            {
+                return;
+            }
         }
 
         public void ListenToItems()
@@ -133,12 +200,21 @@ namespace GhostloreAP
 
         private void OnItemReceieved(ReceivedItemsHelper helper)
         {
+            var item = helper.PeekItem();
+            helper.DequeueItem();
+            int itemId_ = item.Item;
+            long locId_ = item.Location;
             GLAPLocationManager.instance.RefreshLocationCountCleared();
-            var item = helper.DequeueItem();
-            GLAPNotification.instance.DisplayMessage(GetReceivedItemMessage(item.Item), () =>
+            GLAPNotification.instance.DisplayMessage(GetReceivedItemMessage(itemId_), () =>
             {
-                GLAPItemGiver.instance.GiveItem(item.Item);
+                GLAPItemGiver.instance.GiveItem(itemId_);
+                
             });
+        }
+
+        private bool AlreadyRecievedItem(int item_,long location_)
+        {
+            return false;
         }
 
         private void OnPacketConnected(ConnectedPacket p)
@@ -203,6 +279,11 @@ namespace GhostloreAP
             return LocationAlreadyChecked(GetShopLocation(index));
         }
 
+        public bool RecipeOwned(int index)
+        {
+            return _session.Items.AllItemsReceived.Where(i => GetItemName(i.Item) == ("Recipe "+(index+1))).Count() != 0;
+        }
+
         public long GetShopLocation(int index)
         {
             return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format(SHOPNAME, index + 1));
@@ -249,6 +330,11 @@ namespace GhostloreAP
             return _session.Items.AllItemsReceived.Where(i=>i.Item==id_).Count();
         }
 
+        public bool HasItem(int id_)
+        {
+            return GetItemCountReceived(id_) != 0;
+        }
+
         public int GetLootItemCountReceived()
         {
             return _session.Items.AllItemsReceived.Where(i => GetItemName(i.Item).Contains("Loot")).Count();
@@ -263,6 +349,7 @@ namespace GhostloreAP
         {
             return _session.Items.GetItemName(id);
         }
+
 
         public bool LocationAlreadyChecked(long id)
         {

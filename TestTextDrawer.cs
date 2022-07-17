@@ -17,9 +17,10 @@ namespace GhostloreAP
         }
 
 
-        public void DisplayMessage(string msg_)
+        public string DisplayMessage(string msg_)
         {
             message = msg_+"\n"+message;
+            return msg_;
         }
 
         void OnGUI()

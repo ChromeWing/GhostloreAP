@@ -36,6 +36,8 @@ namespace GhostloreAP
 
         public static readonly string BRACELET_DESCRIPTION = "A strange bracelet that seems to link items between worlds...";
 
+        
+
         public void Init()
         {
             referenceItem = ItemManager.instance.GetItemFromName("Sona");
@@ -95,15 +97,21 @@ namespace GhostloreAP
 
         public void SetupArchipelagoShop(NPCTrader trader)
         {
+            if (!GLAPClient.instance.Connected) { return; }
             var traderCharacter = trader.ParentCharacter;
+            System.Random rng_ = new System.Random(GLAPClient.instance.Seed);
             for (int i = 0; i < 20; i++)
             {
-                if (!GLAPClient.instance.Connected) { continue; }
                 if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
-                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, GLAPSettings.baseItemShopCost, referenceItem, traderCharacter);
+                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, 10, referenceItem, traderCharacter); //TODO replace "10" with GetRandomShopPrice(rng_)
                 
             }
 
+        }
+
+        private int GetRandomShopPrice(System.Random rng_)
+        {
+            return (int)Math.Pow(GLAPSettings.baseItemShopCost, 1 + rng_.NextDouble());
         }
 
         
