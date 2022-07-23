@@ -67,8 +67,14 @@ namespace GhostloreAP
         public void Cleanup()
         {
             _connectionPacketReceieved = false;
+            _loginResult = null;
             _session = null;
             _loginResult = null;
+        }
+
+        public async Task Connect(GLAPProfile profile)
+        {
+            await Connect(profile.slot_name,profile.ip,profile.port,profile.password);
         }
 
         public async Task Connect(string slotName_, string ip_ = "localhost", int port_ = 38281, string password_="", System.Action onSuccess_=null, System.Action onFail_=null)
@@ -154,12 +160,27 @@ namespace GhostloreAP
 
         public void ListenToItems()
         {
+            bool queueEmpty_ = false;
+            while (!queueEmpty_)
+            {
+                try
+                {
+                    var item_ = _session.Items.PeekItem();
+                    _session.Items.DequeueItem();
+                    ProcessItemReceieved(item_);
+
+                }catch(InvalidOperationException ex)
+                {
+                    queueEmpty_ = true;
+                }
+            }
             _session.Items.ItemReceived += OnItemReceieved;
         }
 
         public void Disconnect()
         {
             CloseConnection();
+            Cleanup();
         }
 
         private void Initialize()
@@ -169,9 +190,15 @@ namespace GhostloreAP
 
         private void CloseConnection()
         {
-
             GLAPModLoader.DebugShowMessage("CLOSE CONNECTION!");
+            if (_session == null || _session.Socket==null) { return; }
             _session.Socket.PacketReceived -= OnPacketReceived;
+
+            if (_session.Socket.Connected)
+            {
+                _session.Socket.Disconnect();
+            }
+            GLAPModLoader.DebugShowMessage("CLOSE CONNECTION SUCCESS!");
         }
 
         private void OnPacketReceived(ArchipelagoPacketBase packet_)
@@ -202,14 +229,22 @@ namespace GhostloreAP
         {
             var item = helper.PeekItem();
             helper.DequeueItem();
+            ProcessItemReceieved(item);
+        }
+
+        private void ProcessItemReceieved(NetworkItem item)
+        {
             int itemId_ = item.Item;
             long locId_ = item.Location;
-            GLAPLocationManager.instance.RefreshLocationCountCleared();
-            GLAPNotification.instance.DisplayMessage(GetReceivedItemMessage(itemId_), () =>
+            if (GLAPProfileManager.instance.ItemGranted(itemId_, locId_))
             {
-                GLAPItemGiver.instance.GiveItem(itemId_);
-                
-            });
+                GLAPLocationManager.instance.RefreshLocationCountCleared();
+                GLAPNotification.instance.DisplayMessage(GetReceivedItemMessage(itemId_), () =>
+                {
+                    GLAPItemGiver.instance.GiveItem(itemId_);
+
+                });
+            }
         }
 
         private bool AlreadyRecievedItem(int item_,long location_)
@@ -264,6 +299,22 @@ namespace GhostloreAP
 
             }, GetShopLocation(index));
         }
+        public void CompleteChthoniteCheck()
+        {
+            _session.Locations.CompleteLocationChecksAsync((success) =>
+            {
+
+            }, GetQuestChestLocation("Chthonite"));
+        }
+
+        public void CompleteAstraliteCheck()
+        {
+            _session.Locations.CompleteLocationChecksAsync((success) =>
+            {
+
+            }, GetQuestChestLocation("Astralite"));
+        }
+
 
         public void CompleteKillQuestAsync(string locationName_)
         {
@@ -287,6 +338,11 @@ namespace GhostloreAP
         public long GetShopLocation(int index)
         {
             return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format(SHOPNAME, index + 1));
+        }
+
+        public long GetQuestChestLocation(string name_)
+        {
+            return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format("{0} Chest", name_));
         }
 
         public long GetLocationFromName(string name)
@@ -334,6 +390,8 @@ namespace GhostloreAP
         {
             return GetItemCountReceived(id_) != 0;
         }
+
+
 
         public int GetLootItemCountReceived()
         {

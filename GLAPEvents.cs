@@ -10,5 +10,7 @@ namespace GhostloreAP
     {
         public static Action<CharacterContainer,int> OnCreatureKilled;
         public static Action<XQuestRequirement> OnKillQuestCompleted;
+
+        public static Action OnLoadedIntoNewArea;
     }
 }

@@ -72,6 +72,8 @@ namespace GhostloreAP
         {
             GLAPClient.instance.Connect(slotName, ip, port, password, () =>
             {
+                GLAPProfileManager.instance.InitProfile(slotName,ip,port,password);
+
                 accepted = true;
                 __instance.OnNewGame();
             },

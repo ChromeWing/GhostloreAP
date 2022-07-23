@@ -11,15 +11,11 @@ using System.Reflection;
 /* TODO:
 4h * define an AP world for Ghostlore (almost done)
 2h * detect different goals reached
-4h * complete the recipe system in this mod (loading currently unlocked recipes in the restaurant menu)
 6h * add Chthonite and Astralite as checks
-3h * successfully create a foolproof way of handing over the Chthonite and Astralite items to the player
 2h * add chests as checks (up to 50)
 2h * add coin rewards to the pool (from chests)
-8h * create text field form on character creation that saves an Archipelago profile (this will allow multiple saved characters to have their own individually assigned multiworld)
-2h * save granted items to the archipelago profile (in case someone were to create multiple characters under the same server)
 2h * add setting for XP earned buff
-total: * 50h
+total: * 18h
  */
 
 namespace GhostloreAP
@@ -44,8 +40,10 @@ namespace GhostloreAP
             modInfo = ModManager.Mods.Find((mod) => mod.Name == "Archipelago");
             singletons = new List<IGLAPSingleton>();
             GLAPClient.EnsureExists();
-            singletons.Add(GLAPClient.instance);
+            GLAPProfileManager.EnsureExists();
             GLAPNotification.EnsureExists();
+            singletons.Add(GLAPClient.instance);
+            singletons.Add(GLAPProfileManager.instance);
             singletons.Add(GLAPNotification.instance);
 
             DebugShowMessage("===============================");
@@ -56,10 +54,10 @@ namespace GhostloreAP
 
 
             harmony = new Harmony("com.chromewing.ghostlore-archipelago");
-            SetNewGamePatchActive(true);
+            SetExternalPatchActive(true);
         }
 
-        private void SetNewGamePatchActive(bool active_)
+        private void SetExternalPatchActive(bool active_)
         {
             MethodBase method_ = typeof(NewGameMenu).GetMethod(nameof(NewGameMenu.OnNewGame), BindingFlags.Instance | BindingFlags.Public);
             MethodInfo patchMethod_ = CharacterCreationPatcher.GetPrefix(CharacterCreationPatcher.Prefix);
@@ -67,18 +65,30 @@ namespace GhostloreAP
 
             MethodBase method2_ = typeof(OptionsMenuLoader).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic);
             MethodInfo patchMethod2_ = CharacterCreationPatcher.GetPrefix2(CharacterCreationPatcher.Prefix2);
-            DebugShowMessage("methodNull?" + (method_ == null));
-            DebugShowMessage("patchNull?" + (patchMethod_ == null));
+
+
+            MethodBase method3_ = typeof(LoadingManager).GetMethod(
+                "LoadGame", 
+                BindingFlags.Instance | BindingFlags.NonPublic, null,
+                CallingConventions.Any,
+                new Type[] { typeof(SaveGameSummary) },
+                null);
+            MethodInfo patchMethod3_ = LoadGamePatcher.GetPostfix(LoadGamePatcher.Postfix);
+            DebugShowMessage("methodNull?" + (method3_ == null));
+            DebugShowMessage("patchNull?" + (patchMethod3_ == null));
             if (active_)
             {
                 harmony.Patch(method_, new HarmonyMethod(patchMethod_));
                 harmony.Patch(method2_, new HarmonyMethod(patchMethod2_));
+                harmony.Patch(method3_, new HarmonyMethod(patchMethod3_));
             }
             else
             {
                 harmony.Unpatch(method_, patchMethod_);
                 harmony.Unpatch(method2_, patchMethod2_);
+                harmony.Unpatch(method3_, patchMethod3_);
             }
+            DebugShowMessage("External patching set to " + active_);
         }
 
         private void InitSingletons()
@@ -120,8 +130,11 @@ namespace GhostloreAP
         {
             if (!GLAPClient.instance.SessionMade)
             {
-                await GLAPClient.instance.Connect("ChromeWingGL");
-
+                await GLAPProfileManager.instance.ConnectLoadedProfile();
+                if (!GLAPProfileManager.instance.ValidProfile)
+                {
+                    return;
+                }
             }
             else
             {
@@ -138,6 +151,8 @@ namespace GhostloreAP
 
             await ReloadQuests();
 
+
+
             GLAPClient.tryInstance?.ListenToItems();
         }
 
@@ -153,17 +168,19 @@ namespace GhostloreAP
 
         public void OnGameUnloaded()
         {
+            DebugShowMessage("OnGameUnloaded");
             if(GLAPLocationManager.instance != null)
             {
                 GLAPLocationManager.instance.ShutdownListeners();
             }
+
         }
 
         public void OnReleased()
         {
             if(harmony != null)
             {
-                SetNewGamePatchActive(false);
+                SetExternalPatchActive(false);
                 harmony.UnpatchAll();
             }
 

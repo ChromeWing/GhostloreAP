@@ -376,4 +376,19 @@ namespace GhostloreAP
         }
 
     }
+
+    [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.IsLocationUnlocked))]
+    public class IsLocationUnlockedPatcher
+    {
+        static void Postfix(GameLocation location,GameLocationAttributes locationsReached, bool __result,QuestInstance[] ___questInstances)
+        {
+            QuestInstance qi = ___questInstances.FirstOrDefault((QuestInstance c) => c.Quest == location.QuestRequirement);
+            if(qi == null) { return; }
+            var currentStage_=Traverse.Create(qi).Field("currentStage").GetValue<int>();
+            Quest q = Traverse.Create(qi).Field("quest").GetValue<Quest>();
+            GLAPModLoader.DebugShowMessage("DEBUG UNLOCKS:result="+__result+"location="+location.name+"location.QuestRequirement Null?"+(location.QuestRequirement==null)+",locationsReached="+((int)locationsReached)+"locationAttrib="+((int)location.Attributes)+",questInstanceNull?"+(qi==null)+",questInstance.Active?"+(qi!=null && qi.Active)+",questInstance.Completed?"+(qi != null && qi.Completed)+",currentStage="+(currentStage_)+",stagesLength="+q.Stages.Length);
+            GLAPModLoader.SaveLog();
+        }
+
+    }
 }

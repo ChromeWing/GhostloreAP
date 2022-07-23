@@ -9,10 +9,17 @@ namespace GhostloreAP
 {
     public class GLAPItemGiver : Singleton<GLAPItemGiver>, IGLAPSingleton
     {
-        private bool active = true;
+        private bool initialized = false;
 
-        private readonly int minLootId = 10133000;
-        private readonly int maxLootId = 10133022;
+        private const int minLootId = 10133000;
+        private const int maxLootId = 10133022;
+
+        private const int minRecipeId = 10133023;
+        private const int maxRecipeId = 10133042;
+
+        private const int chthoniteId = 10133043;
+        private const int astraliteId = 10133044;
+
 
 
         private Dictionary<int, Creature> creatures;
@@ -27,6 +34,7 @@ namespace GhostloreAP
 
         private void Init()
         {
+            if (initialized) { return; }
             creatures = new Dictionary<int, Creature>();
             for(int i=0;i< CreatureCatalogLogger.instance.validCreatureNames.Length;i++)
             {
@@ -39,14 +47,37 @@ namespace GhostloreAP
                 GLAPModLoader.DebugShowMessage(k + ":" + creatures[k]);
             }
 
-            active = true;
+
+            GLAPEvents.OnLoadedIntoNewArea += CheckHasQuestItems;
+            GLAPModLoader.DebugShowMessage("Registered OnLoadedIntoNewArea event!!!");
+            initialized = true;
         }
 
         public void Cleanup()
         {
-            active = false;
+            initialized = false;
+            GLAPEvents.OnLoadedIntoNewArea -= CheckHasQuestItems;
             if (this == null) { return; }
             GameObject.Destroy(this.gameObject);
+        }
+
+
+        public void CheckHasQuestItems()
+        {
+            GLAPModLoader.DebugShowMessage("CHECKHASQUESTITEMS!");
+            if(GLAPClient.instance.HasItem(chthoniteId) && !HasQuestItemInInventory("Chthonite"))
+            {
+                GLAPNotification.instance.DisplayMessage("Your Chthonite followed you here, please pick it up!",()=> { GiveItem(chthoniteId); });
+            }
+            if (GLAPClient.instance.HasItem(astraliteId) && !HasQuestItemInInventory("Astralite"))
+            {
+                GLAPNotification.instance.DisplayMessage("Your Astralite followed you here, please pick it up!", () => { GiveItem(astraliteId); });
+            }
+        }
+
+        private bool HasQuestItemInInventory(string name_)
+        {
+            return PlayerManager.instance.AnyPlayerHasQuestItem(ItemManager.instance.GetItemFromName(name_));
         }
 
         public void GiveItem(int item_)
@@ -66,6 +97,12 @@ namespace GhostloreAP
                         GLAPLocationManager.instance.MaxLevel
                     );
                     break;
+                case chthoniteId:
+                    DropItem("Chthonite");
+                    break;
+                case astraliteId:
+                    DropItem("Astralite");
+                    break;
             }
         }
 
@@ -78,11 +115,25 @@ namespace GhostloreAP
                 case var i when i >= minLootId && i <= maxLootId:
                     var creature_ = creatures[i];
                     return string.Format("Loot from {0} showers around you!", creature_.CreatureDisplayName);
+                case var i when i >= minRecipeId && i <= maxRecipeId:
+                    return "You received a new food recipe at the restaurant!";
+                case chthoniteId:
+                    return "An important item Chthonite appears in front of you!";
+                case astraliteId:
+                    return "An important item Astralite appears in front of you!";
                     
             }
             return "Receieved item that we don't support yet :(";
         }
 
+        public void DropItem(string name_)
+        {
+            var player = PlayerManager.instance.GetFirstPlayer();
+
+            Item droppedItem_ = ItemManager.instance.GetItemFromName(name_);
+
+            ItemManager.instance.SpawnItem(droppedItem_, 1, 1, 0, player.transform.position + Vector3.up * .1f, player.transform.position);
+        }
 
         public async void DropItemsFrom(Creature creature,int count,float minLevel,float maxLevel)
         {
@@ -94,7 +145,7 @@ namespace GhostloreAP
             {
                 int itemLevel = (int)Mathf.Lerp(minLevel, maxLevel, ((float)i) / count);
                 GLAPModLoader.DebugShowMessage("Dropping item level "+itemLevel);
-                if (active)
+                if (initialized)
                 {
                     //NOTE: we are going to stick with player level to determine item drop.  If the player indicates they want async runs, I could use async levels instead (based on progress)
                     switch (GLAPSettings.itemLevelType)
