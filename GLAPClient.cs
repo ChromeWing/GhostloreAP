@@ -64,6 +64,7 @@ namespace GhostloreAP
         private readonly string GAMENAME = "Ghostlore";
         private readonly string SHOPNAME = "Link Bracelet #{0}";
 
+
         public void Cleanup()
         {
             _connectionPacketReceieved = false;
@@ -265,6 +266,7 @@ namespace GhostloreAP
         private void OnPacketJsonPrint(PrintJsonPacket p)
         {
             var text = new StringBuilder();
+            
             foreach (var d in p.Data)
             {
                 switch (d.Type)
@@ -323,6 +325,21 @@ namespace GhostloreAP
 
             }, GetLocationFromName(locationName_));
 
+        }
+
+        public bool CompleteChestCheck() //returns false if there's no more chest checks.
+        {
+            long max = GetLocationFromName("Treasure Chest #50");
+            for (long i = GetLocationFromName("Treasure Chest #1"); i <= max; i++)
+            {
+                if (LocationAlreadyChecked(i)) { continue; }
+                _session.Locations.CompleteLocationChecksAsync((success) =>
+                {
+
+                }, i);
+                return true;
+            }
+            return false;
         }
 
         public bool ShopAlreadyChecked(int index)

@@ -12,9 +12,14 @@ namespace GhostloreAP
     {
         static Item chthonite, astralite;
 
-        static bool Prefix(LootTable ___lootTable)
+        static bool Prefix(LootTable ___lootTable, ref bool ___opened)
         {
             GLAPModLoader.DebugShowMessage("GOING TO OPEN A CHEST.");
+            if (___opened) 
+            {
+                GLAPModLoader.DebugShowMessage("Already opened????");
+                return true; 
+            }
             if (chthonite == null)
             {
                 InitItems();
@@ -29,12 +34,14 @@ namespace GhostloreAP
                     {
                         GLAPModLoader.DebugShowMessage("ABOUT TO DO CHTHONITE CHEST CHECK");
                         GLAPClient.instance.CompleteChthoniteCheck();
+                        ___opened = true;
                         return false;
                     }
                     if (item == astralite)
                     {
                         GLAPModLoader.DebugShowMessage("ABOUT TO DO ASTRALITE CHEST CHECK");
                         GLAPClient.instance.CompleteAstraliteCheck();
+                        ___opened = true;
                         return false;
                     }
                 }
@@ -45,7 +52,17 @@ namespace GhostloreAP
                 }
 
                 //TODO: add chest checks here
-
+                //it's a normal chest, do a chest location check.
+                GLAPModLoader.DebugShowMessage("Going to do a chest check!!");
+                if (GLAPClient.instance.CompleteChestCheck())
+                {
+                    ___opened = true;
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
             else
             {

@@ -11,11 +11,7 @@ using System.Reflection;
 /* TODO:
 4h * define an AP world for Ghostlore (almost done)
 2h * detect different goals reached
-6h * add Chthonite and Astralite as checks
-2h * add chests as checks (up to 50)
-2h * add coin rewards to the pool (from chests)
-2h * add setting for XP earned buff
-total: * 18h
+total: * 6h
  */
 
 namespace GhostloreAP

@@ -61,6 +61,8 @@ namespace GhostloreAP
                     return 0;
                 case "Hantu Tinggi":
                     return 0;
+                case "Hantu Raya":
+                    return 0;
                 case "Rafflesia":
                     return 0;
                 case "Summoner":
@@ -70,6 +72,15 @@ namespace GhostloreAP
                     return 1.5f;
                 case "Pontianak Tree":
                     return 0.5f;
+                case "Jiang Shi":
+                    return 1.5f;
+                case "Stone Guardian":
+                    return .6f;
+                case "Komodo Wizard Ice":
+                    return .5f;
+                case var name when name.ToLower().Contains("spirit orb"):
+                    return .3f;
+                
 
             }
             return 1;
@@ -90,6 +101,8 @@ namespace GhostloreAP
                 case "Summoner":
                     return 1;
                 case "Hantu Tinggi":
+                    return 1;
+                case "Hantu Raya":
                     return 1;
 
             }

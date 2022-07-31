@@ -114,7 +114,7 @@ namespace GhostloreAP
             for (int i = 0; i < 20; i++)
             {
                 if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
-                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, 10, secondaryReferenceItem, traderCharacter); //TODO replace "10" with GetRandomShopPrice(rng_)
+                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, GLAPSettings.GetShopPrice(i), secondaryReferenceItem, traderCharacter); //TODO replace "10" with GetRandomShopPrice(rng_)
                 
             }
 

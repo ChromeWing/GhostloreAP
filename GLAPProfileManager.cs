@@ -68,7 +68,7 @@ namespace GhostloreAP
         public void DisconnectAndSave()
         {
             GLAPModLoader.DebugShowMessage("DisconnectAndSave()");
-            if (!ValidProfile || loadedCharacterHash==null) 
+            if (!ValidProfile) 
             {
 
                 GLAPModLoader.DebugShowMessage("DisconnectAndSave() had Null profile!");
@@ -76,6 +76,7 @@ namespace GhostloreAP
             }
             Save(loadedCharacterHash);
             GLAPClient.instance.Disconnect();
+            GLAPModLoader.SaveLog();
         }
 
         public void Load(string hash)

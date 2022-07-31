@@ -10,7 +10,6 @@ namespace GhostloreAP
 
     public enum MonsterWorkload
     {
-        TEST,
         QuickPlaythrough,
         SinglePlaythrough,
         SomeGrinding,
@@ -36,33 +35,55 @@ namespace GhostloreAP
     {
         public static bool deathlink = false;
         public static ItemLevelType itemLevelType = ItemLevelType.TiedToCharacterLevel;
-        public static MonsterWorkload workload = MonsterWorkload.TEST;
+        public static MonsterWorkload workload = MonsterWorkload.SinglePlaythrough;
         public static int baseItemShopCost = 100;
         public static int killQuestsPerMonster = 5; //allowed values: 3-10
+        public static int experienceRate = 100;
         public static GoalType goalType = GoalType.CompleteStory;
+
+
+        private static readonly float[] shopPriceBases = new float[]
+        {
+            5,
+            6,
+            4,
+            20,
+            7,
+            6.5f,
+            5.5f,
+            1,
+            8,
+            4.4f,
+            3.5f,
+            5.6f,
+            13,
+            8.8f,
+            7.7f,
+            4.1f,
+            6.2f,
+            9.3f,
+            10,
+            3
+        };
+
+        public static int GetShopPrice(int i)
+        {
+            return (int)(shopPriceBases[i] / 2f * baseItemShopCost);
+        }
+
+        public static float ExperienceMultiplier { get{
+                return experienceRate/100f; 
+        } }
 
         public static void Set(Dictionary<string,object> data)
         {
-            GLAPModLoader.DebugShowMessage("gonna Set Options...");
-            foreach(var key in data.Keys)
-            {
-                //GLAPModLoader.DebugShowMessage(key);
-
-            }
-            GLAPModLoader.DebugShowMessage("done showing keys.");
-
+            experienceRate = Convert.ToInt32(data["experience_rate"]);
             killQuestsPerMonster = Convert.ToInt32(data["kill_quests_per_monster"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
             itemLevelType = (ItemLevelType)Convert.ToInt32(data["item_level_type"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
             workload = (MonsterWorkload)Convert.ToInt32(data["monster_workload"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
             baseItemShopCost = Convert.ToInt32(data["base_item_shop_price"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
             goalType = (GoalType)Convert.ToInt32(data["goal"]);
-            GLAPModLoader.DebugShowMessage("SettingSettings!");
             deathlink = Convert.ToInt32(data["death_link"]) == 1;
-            GLAPModLoader.DebugShowMessage("DONE!");
         }
     }
 }
