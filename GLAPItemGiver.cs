@@ -64,15 +64,17 @@ namespace GhostloreAP
 
         public void CheckHasQuestItems()
         {
+            GLAPModLoader.DebugShowMessage("current location id:"+MapManager.GetActiveLocationID);
             GLAPModLoader.DebugShowMessage("CHECKHASQUESTITEMS!");
-            if(GLAPClient.instance.HasItem(chthoniteId) && !HasQuestItemInInventory("Chthonite"))
+            if(GLAPClient.instance.HasItem(chthoniteId) && GLAPClient.instance.ItemGiven(chthoniteId) && !HasQuestItemInInventory("Chthonite"))
             {
                 GLAPNotification.instance.DisplayMessage("Your Chthonite followed you here, please pick it up!",()=> { GiveItem(chthoniteId); });
             }
-            if (GLAPClient.instance.HasItem(astraliteId) && !HasQuestItemInInventory("Astralite"))
+            if (GLAPClient.instance.HasItem(astraliteId) && GLAPClient.instance.ItemGiven(astraliteId) && !HasQuestItemInInventory("Astralite"))
             {
                 GLAPNotification.instance.DisplayMessage("Your Astralite followed you here, please pick it up!", () => { GiveItem(astraliteId); });
             }
+            GLAPModLoader.SaveLog();
         }
 
         private bool HasQuestItemInInventory(string name_)

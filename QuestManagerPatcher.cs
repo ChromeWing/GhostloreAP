@@ -128,23 +128,23 @@ namespace GhostloreAP
 
         public bool CompletedAllKillsForCreature(Creature creature)
         {
-            GLAPModLoader.DebugShowMessage(">>>>about to test questInstances.");
+            //GLAPModLoader.DebugShowMessage(">>>>about to test questInstances.");
             foreach (QuestInstance q in _questInstances)
             {
-                GLAPModLoader.DebugShowMessage(">>>>we did a questinstance!!!!");
-                GLAPModLoader.DebugShowMessage(">>>currentStage=" + q.CurrentStage + ", length-1=" + (q.Quest.Stages.Length - 1));
+                //GLAPModLoader.DebugShowMessage(">>>>we did a questinstance!!!!");
+                //GLAPModLoader.DebugShowMessage(">>>currentStage=" + q.CurrentStage + ", length-1=" + (q.Quest.Stages.Length - 1));
                 if (q.CurrentStage < q.Quest.Stages.Length-1) { continue; }
-                GLAPModLoader.DebugShowMessage(">>>>we passed a questinstance!!!!");
+                //GLAPModLoader.DebugShowMessage(">>>>we passed a questinstance!!!!");
                 XQuestInstance xq = ExtendedBindingManager.instance.GetExtended<XQuestInstance>(q);
                 if(xq != null)
                 {
-                    GLAPModLoader.DebugShowMessage(">>>>we are in the matches!!!!");
+                    //GLAPModLoader.DebugShowMessage(">>>>we are in the matches!!!!");
                     if (xq.Matches(creature)) { return true; }
                 }
                 else
                 {
 
-                    GLAPModLoader.DebugShowMessage(">>>>it's null.....");
+                    //GLAPModLoader.DebugShowMessage(">>>>it's null.....");
                 }
             }
             return false;
@@ -337,8 +337,16 @@ namespace GhostloreAP
             ___quests = _quests.ToArray();
             var newCount = ((Quest[])Traverse.Create(QuestManager.instance).Field("quests").GetValue()).Length;
             //GLAPModLoader.DebugShowMessage("new quest count is 14? " + newCount);
-            ___questInstances = (from c in ___quests
-                                 select c.MakeInstance()).ToArray<QuestInstance>();
+
+            List<QuestInstance> adjustedInstances = new List<QuestInstance>(___questInstances);
+            for(int i = 0; i < adjustedInstances.Count; i++)
+            {
+                if (adjustedInstances[i].Quest.QuestName.StartsWith("AP:"))
+                {
+                    adjustedInstances[i] = adjustedInstances[i].Quest.MakeInstance();
+                }
+            }
+            ___questInstances = adjustedInstances.ToArray(); //MAKE SURE NOT TO OVERWRITE VANILLA QUEST INSTANCES BECAUSE THEN WE LOSE PROGRESS AND GET STUCK IN TOWN!!!
 
             QuestFactory.instance.ClearAPQuestInstances();
             foreach (QuestInstance q_ in ___questInstances)
@@ -371,11 +379,53 @@ namespace GhostloreAP
 
             ___questInstances = questInstances.ToArray();
 
-            GLAPModLoader.DebugShowMessage("quests counts is " + ___questInstances.Length);
+            //GLAPModLoader.DebugShowMessage("quests counts is " + ___questInstances.Length);
+        }
+
+    }
+    /*
+    [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.IsLocationUnlocked))]
+    public class IsLocationUnlockedPatcher
+    {
+        static void Postfix(GameLocation location, GameLocationAttributes locationsReached, bool __result, QuestInstance[] ___questInstances)
+        {
+            QuestInstance qi = ___questInstances.FirstOrDefault((QuestInstance c) => c.Quest == location.QuestRequirement);
+            if (qi == null) { return; }
+            var currentStage_ = Traverse.Create(qi).Field("currentStage").GetValue<int>();
+            Quest q = Traverse.Create(qi).Field("quest").GetValue<Quest>();
+            GLAPModLoader.DebugShowMessage("DEBUG UNLOCKS:result=" + __result + "location=" + location.name + "location.QuestRequirement Null?" + (location.QuestRequirement == null) + ",locationsReached=" + ((int)locationsReached) + "locationAttrib=" + ((int)location.Attributes) + ",questInstanceNull?" + (qi == null) + ",questInstance.Active?" + (qi != null && qi.Active) + ",questInstance.Completed?" + (qi != null && qi.Completed) + ",currentStage=" + (currentStage_) + ",stagesLength=" + q.Stages.Length);
+            GLAPModLoader.SaveLog();
         }
 
     }
 
+    [HarmonyPatch(typeof(QuestInstance), "CheckGiveQuest")]
+    public class CheckGiveQuestPatcher
+    {
+        static void Postfix(CharacterContainer player, Quest ___quest,QuestInstance __instance)
+        {
+            GLAPModLoader.DebugShowMessage("DEBUG CHECKGIVE:quest=" + ___quest.name + 
+                "0=(" + __instance.CurrentStage + "/"+___quest.Stages.Length+")"+
+                "1=" + ((___quest.Attributes & QuestAttributes.AutoGiven) != QuestAttributes.None) + 
+                "2=" + ((___quest.Attributes & QuestAttributes.Hidden) == QuestAttributes.None) + 
+                "3=" + ___quest.PassedRequirements() + 
+                "4=" + ((___quest.Attributes & QuestAttributes.FirstNewClass) != QuestAttributes.None) + 
+                "5=" + Singleton<PlayerManager>.instance.MeetsLevelRequirement(player.GetCharacterComponent<CharacterExperience>().CurrentLevel, 1)+ "!0 && ((1 && 2 && 3) || (4 && 5))");
+            
+        }
+
+    }
+
+    [HarmonyPatch(typeof(QuestInstance), nameof(QuestInstance.CheckProgress))]
+    public class CheckProgressPatcher
+    {
+        static void Postfix(CharacterContainer player,Quest ___quest,ref int ___currentStage)
+        {
+            
+        }
+
+    }
+    */
 
 
 

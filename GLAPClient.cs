@@ -80,7 +80,7 @@ namespace GhostloreAP
         public async Task Connect(string slotName_, string ip_ = "localhost", int port_ = 38281, string password_="", System.Action onSuccess_=null, System.Action onFail_=null)
         {
             GLAPModLoader.DebugShowMessage("stage1");
-            GLAPModLoader.SaveLog();
+            //GLAPModLoader.SaveLog();
             _session = ArchipelagoSessionFactory.CreateSession(ip_, port_);
             
             
@@ -94,17 +94,17 @@ namespace GhostloreAP
                 GLAPModLoader.DebugShowMessage("stage2");
                 Initialize();
                 GLAPModLoader.DebugShowMessage("stage3");
-                GLAPModLoader.SaveLog();
+                //GLAPModLoader.SaveLog();
                 _loginResult = _session.TryConnectAndLogin("Ghostlore", slotName_, new Version(0, 3, 3), Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems,null,null,password_);
 
                 GLAPModLoader.DebugShowMessage("stage4");
-                GLAPModLoader.SaveLog();
+                //GLAPModLoader.SaveLog();
                 await Task.Yield();
                 
                 if (_session.Socket.Connected)
                 {
                     GLAPModLoader.DebugShowMessage("stage5");
-                    GLAPModLoader.SaveLog();
+                    //GLAPModLoader.SaveLog();
                     GLAPNotification.instance.DisplayMessage(slotName_ + " connected to Archipelago!");
                     GLAPNotification.instance.DisplayMessage("Welcome!");
                     var timeout_ = Time.fixedTime;
@@ -120,7 +120,7 @@ namespace GhostloreAP
                         return;
                     }
                     GLAPModLoader.DebugShowMessage("stage6");
-                    GLAPModLoader.SaveLog();
+                    //GLAPModLoader.SaveLog();
                     onSuccess_?.Invoke();
                     return;
 
@@ -128,7 +128,7 @@ namespace GhostloreAP
                 else
                 {
                     GLAPModLoader.DebugShowMessage("stage7");
-                    GLAPModLoader.SaveLog();
+                    //GLAPModLoader.SaveLog();
                     GLAPNotification.instance.DisplayMessage(slotName_ + " failed to connect to Archipelago...");
                     GLAPNotification.instance.DisplayMessage("Please visit the Steam Workshop page for this mod for troubleshooting.");
                 }
@@ -342,6 +342,7 @@ namespace GhostloreAP
 
         public long GetQuestChestLocation(string name_)
         {
+            GLAPModLoader.DebugShowMessage("completing check for:\"" + string.Format("{0} Chest", name_)+"\"");
             return _session.Locations.GetLocationIdFromName(GAMENAME, string.Format("{0} Chest", name_));
         }
 
@@ -391,7 +392,10 @@ namespace GhostloreAP
             return GetItemCountReceived(id_) != 0;
         }
 
-
+        public bool ItemGiven(int id_)
+        {
+            return _session.Items.AllItemsReceived.Where(i => i.Item == id_ && !GLAPProfileManager.instance.ItemGranted(i.Item, i.Location, true)).Count() > 0;
+        }
 
         public int GetLootItemCountReceived()
         {

@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace GhostloreAP
 {
-    [HarmonyPatch(typeof(LoadingScreen),"UpdateState")]
+    [HarmonyPatch(typeof(LoadingScreen),nameof(LoadingScreen.OnClick))]
     public class LoadingScreenPatcher
     {
         static void Postfix(bool ___loadingComplete, bool ___queuedContinue)

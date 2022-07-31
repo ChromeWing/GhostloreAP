@@ -20,12 +20,12 @@ namespace GhostloreAP
         {
             _recipes = r.ToList();
             System.Random rng_ = new System.Random(GLAPClient.instance.Seed);
-            GLAPModLoader.DebugShowMessage("_recipes.Count="+_recipes.Count);
+            //GLAPModLoader.DebugShowMessage("_recipes.Count="+_recipes.Count);
             while(_recipes.Count > 20)
             {
                 _recipes.RemoveAt((int)(rng_.NextDouble()*_recipes.Count));
             }
-            GLAPModLoader.DebugShowMessage("_recipes.Count=" + _recipes.Count);
+            //GLAPModLoader.DebugShowMessage("_recipes.Count=" + _recipes.Count);
             for (int i = 19; i >= 0; i--)
             {
                 if (!(GLAPClient.tryInstance.Connected && GLAPClient.instance.RecipeOwned(i)))
@@ -51,7 +51,7 @@ namespace GhostloreAP
             List<CraftingRecipeInstance> insts_ = new List<CraftingRecipeInstance>();
             RecipeStorage.instance.ProvideAvailableRecipes(___craftingRecipePool, (r) =>
             {
-                GLAPModLoader.DebugShowMessage("recipe recieved");
+                //GLAPModLoader.DebugShowMessage("recipe recieved");
                 insts_.Add(new CraftingRecipeInstance(r));
             });
 
@@ -59,7 +59,7 @@ namespace GhostloreAP
             {
                 ___recipes.Add(insts_[i]);
             }
-            GLAPModLoader.DebugShowMessage("insts_.Count="+insts_.Count+", ___recipes.Count="+___recipes.Count);
+            //GLAPModLoader.DebugShowMessage("insts_.Count="+insts_.Count+", ___recipes.Count="+___recipes.Count);
         }
     }
 }

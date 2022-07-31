@@ -124,7 +124,7 @@ namespace GhostloreAP
         }
 
 
-        public bool ItemGranted(int item_,long location_) //returns false when the item granted was already granted.
+        public bool ItemGranted(int item_,long location_,bool checkOnly_=false) //returns false when the item granted was already granted.
         {
             if(selectedProfile == null) { return false; }
             bool result = true;
@@ -135,12 +135,16 @@ namespace GhostloreAP
                     result = false;
                     return;
                 }
-                p.items.Add(new ItemClaimedFromLocation(location_,item_));
+                if (!checkOnly_)
+                {
+                    p.items.Add(new ItemClaimedFromLocation(location_,item_));
+                }
             });
             return result;
         }
 
-        
+
+
 
     }
 

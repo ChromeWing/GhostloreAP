@@ -46,7 +46,7 @@ namespace GhostloreAP
             GLAPModLoader.DebugShowMessage("gonna Set Options...");
             foreach(var key in data.Keys)
             {
-                GLAPModLoader.DebugShowMessage(key);
+                //GLAPModLoader.DebugShowMessage(key);
 
             }
             GLAPModLoader.DebugShowMessage("done showing keys.");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,9 @@ namespace GhostloreAP
         private static ItemFactory _inst;
 
         private Item referenceItem;
+        private Item secondaryReferenceItem;
+
+        private Item[] debugRefItems = new Item[20];
 
         private Sprite braceletSprite;
 
@@ -37,10 +41,15 @@ namespace GhostloreAP
         public static readonly string BRACELET_DESCRIPTION = "A strange bracelet that seems to link items between worlds...";
 
         
+        
 
         public void Init()
         {
-            referenceItem = ItemManager.instance.GetItemFromName("Sona");
+            referenceItem = (Item)ItemManager.instance.SerializedObjectPrefabs.GetSO(typeof(Item),"AP_Bracelet");
+
+            secondaryReferenceItem = ItemManager.instance.GetItemFromName("Sona");
+            
+            
             archipelagoShopItems = new List<Item>();
             shopItemNames = new string[20];
             braceletSprite = SpriteFactory.LoadSprite("bracelet.png");
@@ -68,9 +77,10 @@ namespace GhostloreAP
 
             Item newItem = new Item();
 
+
             Traverse.Create(newItem).Field("itemName").SetValue(name);
             Traverse.Create(newItem).Field("description").SetValue(description);
-            Traverse.Create(newItem).Field("icon").SetValue(braceletSprite);
+            Traverse.Create(newItem).Field("icon").SetValue(referenceItem.Icon);
             Traverse.Create(newItem).Field("cost").SetValue(cost);
             Traverse.Create(newItem).Field("maxStackSize").SetValue(1);
             Traverse.Create(newItem).Field("attributes").SetValue(ItemAttributes.None);
@@ -78,11 +88,12 @@ namespace GhostloreAP
             Traverse.Create(newItem).Field("levelMin").SetValue(1);
             Traverse.Create(newItem).Field("levelMax").SetValue(1);
             Traverse.Create(newItem).Field("rarityChances").SetValue(new float[1] { 0 });
-            Traverse.Create(newItem).Field("tags").SetValue(referenceItem.Tags);
+            Traverse.Create(newItem).Field("tags").SetValue(new GameTag[0]);
             Traverse.Create(newItem).Field("coreModifiers").SetValue(referenceItem.CoreModifiers);
             Traverse.Create(newItem).Field("instanceComponents").SetValue(referenceItem.InstanceComponents);
             Traverse.Create(newItem).Field("weaponSprite").SetValue(referenceItem.WeaponSprite);
-            Traverse.Create(newItem).Field("tattoo").SetValue(referenceItem.Tattoo);
+
+            Traverse.Create(itemInstance).Field("itemData").SetValue(newItem);
 
 
             ExtendedBindingManager.instance.RegisterAndSet<XItemInstance>(itemInstance, (s) =>
@@ -103,7 +114,7 @@ namespace GhostloreAP
             for (int i = 0; i < 20; i++)
             {
                 if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
-                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, 10, referenceItem, traderCharacter); //TODO replace "10" with GetRandomShopPrice(rng_)
+                AddItemToInventory(i, shopItemNames[i], BRACELET_DESCRIPTION, 10, secondaryReferenceItem, traderCharacter); //TODO replace "10" with GetRandomShopPrice(rng_)
                 
             }
 

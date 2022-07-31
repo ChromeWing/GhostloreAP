@@ -14,11 +14,13 @@ namespace GhostloreAP
     {
         static void Postfix(Image[] images, SetSpriteSettings settings, ItemInstance __instance)
         {
+            /*
             XItemInstance ex = ExtendedBindingManager.instance.GetExtended<XItemInstance>(__instance);
             if (ex != null)
             {
                 Helpers.SetSprite(images[0], ItemFactory.instance.Bracelet, 0f, false, .5f, true);
             }
+            */
         }
     }
     [HarmonyPatch(typeof(ItemInstance), "get_Cost")]
@@ -33,4 +35,6 @@ namespace GhostloreAP
             }
         }
     }
+
+    
 }

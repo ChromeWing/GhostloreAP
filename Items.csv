@@ -1,0 +1,3 @@
+Item,,,,,,,,,,,,,,,,,,Modifier: Item.coreModifiers,,,,,,,
+Item Name,Description,Cost,Max Stack Size,Attributes,SoundFX,Loot Animation,Icon,Weapon Sprite,On Pickup,TriggerPower,Enables Power,Level Min,Level Max,RarityChances,Tags,InstanceComponents,Tattoo,Stat,Attributes,Lower Min,Lower Max,Lower Per Level,Upper Min,Upper Max,Upper Per Level
+AP_Bracelet,,400,0,"SuppressAffixDisplay, OneAffixLimit, SimpleGlyph",event:/UI/object,/Loot/item_glyphs_1,/UI/icons_184,,Item pickup,,,1,5,"0,0,0.02",Simple Glyph,,Sona,Skill Damage Multiplier,,0.05,0.15,0,0,0,0

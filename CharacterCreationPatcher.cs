@@ -154,7 +154,7 @@ namespace GhostloreAP
             input_port.characterValidation = TMP_InputField.CharacterValidation.CustomValidator;
             input_password.contentType = TMP_InputField.ContentType.Password;
 
-            GLAPModLoader.SaveLog();
+            //GLAPModLoader.SaveLog();
             setupMenu = true;
         }
 
