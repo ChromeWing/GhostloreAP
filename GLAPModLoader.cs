@@ -11,7 +11,8 @@ using System.Reflection;
 /* TODO:
 4h * define an AP world for Ghostlore (almost done)
 2h * detect different goals reached
-total: * 6h
+3h * implement deathlink, enable/disable with one of the F1-F12 keys
+total: * 9h
  */
 
 namespace GhostloreAP

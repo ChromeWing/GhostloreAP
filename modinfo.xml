@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Your mod's name and description. Must be included in your mod's folder.
-Mods must be placed in a folder inside C:\Users\(your name)\AppData\LocalLow\ATATGames\Ghostlore\mods\(your mod's name).
--->
-<ModInfo>
+<ModInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<name>Archipelago</name>
 	<description>Multiworld with other games in the Archipelago platform!</description>
+	<activated>false</activated>
+	<publishId>2843540693</publishId>
 </ModInfo>
