@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Archipelago.MultiClient.Net;
 using WebSocketSharp;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
@@ -64,9 +65,77 @@ namespace GhostloreAP
         private readonly string GAMENAME = "Ghostlore";
         private readonly string SHOPNAME = "Link Bracelet #{0}";
 
+        private DeathLinkService _deathLinkService;
+
+
+        public void SetDeathLink(bool enabled_)
+        {
+            if (enabled_)
+            {
+                _session.UpdateConnectionOptions(new string[] { "AP", "DeathLink" }, ItemsHandlingFlags.AllItems);
+                if(_deathLinkService != null)
+                {
+                    _deathLinkService.OnDeathLinkReceived -= OnDeathLink;
+                }
+                _deathLinkService = _session.CreateDeathLinkServiceAndEnable();
+                _deathLinkService.OnDeathLinkReceived += OnDeathLink;
+                GLAPNotification.instance.DisplayLog("Deathlink enabled! Toggle off with the F1 key.");
+            }
+            else
+            {
+                _session.UpdateConnectionOptions(new string[] { "AP" }, ItemsHandlingFlags.AllItems);
+                if (_deathLinkService != null)
+                {
+                    _deathLinkService.OnDeathLinkReceived -= OnDeathLink;
+                }
+                _deathLinkService= null;
+                GLAPNotification.instance.DisplayLog("Deathlink disabled. Return to the madness with the F1 key!");
+            }
+            GLAPSettings.deathlink = enabled_;
+        }
+
+        public void CheckWin(GoalType goal_)
+        {
+            if(goal_ == GLAPSettings.goalType)
+            {
+                Win();
+            }
+        }
+
+        private void Win()
+        {
+            var packet = new StatusUpdatePacket();
+            packet.Status = ArchipelagoClientState.ClientGoal;
+            _session.Socket.SendPacket(packet);
+        }
+
+        public void ToggleDeathLink()
+        {
+            SetDeathLink(!GLAPSettings.deathlink);
+        }
+
+        private void ListenToDeathlinkButton()
+        {
+            var deathlinkkey = Component.FindObjectOfType<DeathLinkKey>();
+            if(deathlinkkey == null)
+            {
+                GameObject go = new GameObject("deathlink");
+                go.AddComponent<DeathLinkKey>();
+                DontDestroyOnLoad(go);
+            }
+
+            GLAPEvents.OnToggleDeathlinkPressed -= ToggleDeathLink;
+            GLAPEvents.OnToggleDeathlinkPressed += ToggleDeathLink;
+
+        }
+
 
         public void Cleanup()
         {
+            if(GLAPEvents.OnToggleDeathlinkPressed != null)
+            {
+                GLAPEvents.OnToggleDeathlinkPressed -= ToggleDeathLink;
+            }
             _connectionPacketReceieved = false;
             _loginResult = null;
             _session = null;
@@ -80,11 +149,15 @@ namespace GhostloreAP
 
         public async Task Connect(string slotName_, string ip_ = "localhost", int port_ = 38281, string password_="", System.Action onSuccess_=null, System.Action onFail_=null)
         {
+
             GLAPModLoader.DebugShowMessage("stage1");
             //GLAPModLoader.SaveLog();
             _session = ArchipelagoSessionFactory.CreateSession(ip_, port_);
-            
-            
+
+
+            ListenToDeathlinkButton();
+
+
             if (password_ == "")
             {
                 password_ = null;
@@ -256,6 +329,7 @@ namespace GhostloreAP
         private void OnPacketConnected(ConnectedPacket p)
         {
             GLAPSettings.Set(p.SlotData);
+            SetDeathLink(GLAPSettings.deathlink);
         }
 
         private void OnPacketPrint(PrintPacket p)
@@ -292,6 +366,29 @@ namespace GhostloreAP
         private void OnPacketRoomUpdate(RoomUpdatePacket p)
         {
 
+        }
+
+        public void ReportDeath(CharacterContainer character_)
+        {
+            GLAPModLoader.DebugShowMessage("going to send deathlink.");
+            if(_deathLinkService != null)
+            {
+                GLAPModLoader.DebugShowMessage("SENDING DEATHLINK!");
+
+                _deathLinkService.SendDeathLink(new DeathLink(GLAPProfileManager.instance.GetSlotName(), string.Format("Killed by {0}", character_.CreatureDisplayName)));
+            }
+            else
+            {
+
+                GLAPModLoader.DebugShowMessage("it was null...");
+            }
+        }
+
+        private void OnDeathLink(DeathLink deathLink)
+        {
+            var player = PlayerManager.instance.GetFirstPlayer();
+            player.GetCharacterComponent<PlayerDeath>().OnDeath(null, player); //we pass null so that we don't trigger deathlink again!
+            GLAPNotification.instance.DisplayLog(deathLink.Source+" killed you! (Deathlink is on. disable with the F1 key)");
         }
 
         public void CompleteShopCheckAsync(int index)

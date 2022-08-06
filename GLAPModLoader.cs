@@ -10,9 +10,13 @@ using System.Reflection;
 
 /* TODO:
 4h * define an AP world for Ghostlore (almost done)
-2h * detect different goals reached
-3h * implement deathlink, enable/disable with one of the F1-F12 keys
-total: * 9h
+
+1. wait for the final update of Ghostlore so that I can update the location checks (what new monsters there are to do kill quests for)
+2. polish any values for how many monsters to defeat for the specific monster breeds in the kill quests (some monsters appear less often)
+3. write the required docs for setting up Ghostlore for archipelago (this will show up on the website at launch)
+4. submit pull request and hope that it isn't rejected >_<
+5. sit and wait for the new Archipelago update to include my world so that I can fix any inevitable bugs that appear at launch
+total: * 4h
  */
 
 namespace GhostloreAP
@@ -96,6 +100,7 @@ namespace GhostloreAP
             GLAPLocationManager.EnsureExists();
             GLAPItemGiver.EnsureExists();
             RecipeStorage.EnsureExists();
+            AudioRandomizer.EnsureExists();
 
             singletons.Add(ExtendedBindingManager.instance);
             singletons.Add(GLAPLocationManager.instance);
@@ -104,6 +109,7 @@ namespace GhostloreAP
             singletons.Add(CreatureCatalogLogger.instance);
             singletons.Add(ItemFactory.instance);
             singletons.Add(RecipeStorage.instance);
+            singletons.Add(AudioRandomizer.instance);
         }
 
         private void DisposeSingletons()
@@ -143,6 +149,8 @@ namespace GhostloreAP
             ItemFactory.instance.CacheShopItemNames();
             GLAPLocationManager.instance.StartListeners();
             GLAPNotification.instance.Init();
+            AudioRandomizer.instance.Init();
+
 
             harmony.PatchAll();
 

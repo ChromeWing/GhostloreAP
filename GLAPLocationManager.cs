@@ -21,13 +21,9 @@ namespace GhostloreAP
 
         private bool registeredQuestEvents = false;
 
-        public int MinLevel
-        {
-            get { return Math.Max((int)Mathf.Lerp(totalMinLevel, totalMaxLevel, ((float)locationsCleared) / totalLocationCount)-10, totalMinLevel); }
-        }
         public int MaxLevel
         {
-            get { return (int)(Mathf.Lerp(totalMinLevel, totalMaxLevel, ((float)locationsCleared) / totalLocationCount)); }
+            get { return (int)(Mathf.Lerp(totalMinLevel, totalMaxLevel, Math.Min(locationsCleared*2f / totalLocationCount, 1) )); }
         }
 
         protected override void Awake()

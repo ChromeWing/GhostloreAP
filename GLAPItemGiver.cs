@@ -96,7 +96,6 @@ namespace GhostloreAP
                             GLAPSettings.workload, 
                             GLAPClient.instance.GetItemCountReceived(i) - 1
                         ),
-                        GLAPLocationManager.instance.MinLevel,
                         GLAPLocationManager.instance.MaxLevel
                     );
                     break;
@@ -149,7 +148,7 @@ namespace GhostloreAP
             ItemManager.instance.SpawnItem(ItemManager.instance.GetItemFromName("Coins"), count_, 1, 0, player.transform.position + Vector3.up * .1f, player.transform.position);
         }
 
-        public async void DropItemsFrom(Creature creature,int count,float minLevel,float maxLevel)
+        public async void DropItemsFrom(Creature creature,int count,float maxLevel)
         {
             var player = PlayerManager.instance.GetFirstPlayer();
 
@@ -157,7 +156,7 @@ namespace GhostloreAP
             
             for (int i = 0; i < count; i++)
             {
-                int itemLevel = (int)Mathf.Lerp(minLevel, maxLevel, ((float)i) / count);
+                int itemLevel = (int)maxLevel;
                 GLAPModLoader.DebugShowMessage("Dropping item level "+itemLevel);
                 if (initialized)
                 {

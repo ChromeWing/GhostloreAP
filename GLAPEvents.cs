@@ -12,5 +12,7 @@ namespace GhostloreAP
         public static Action<XQuestRequirement> OnKillQuestCompleted;
 
         public static Action OnLoadedIntoNewArea;
+
+        public static Action OnToggleDeathlinkPressed;
     }
 }

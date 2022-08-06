@@ -76,6 +76,12 @@ namespace GhostloreAP
             GLAPModLoader.SaveLog();
         }
 
+        public string GetSlotName()
+        {
+            if(selectedProfile == null) { return null; }
+            return selectedProfile.slot_name;
+        }
+
         public void Load(string hash)
         {
             loadedCharacterHash = hash;

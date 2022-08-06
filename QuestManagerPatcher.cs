@@ -141,23 +141,13 @@ namespace GhostloreAP
 
         public bool CompletedAllKillsForCreature(Creature creature)
         {
-            //GLAPModLoader.DebugShowMessage(">>>>about to test questInstances.");
             foreach (QuestInstance q in _questInstances)
             {
-                //GLAPModLoader.DebugShowMessage(">>>>we did a questinstance!!!!");
-                //GLAPModLoader.DebugShowMessage(">>>currentStage=" + q.CurrentStage + ", length-1=" + (q.Quest.Stages.Length - 1));
                 if (q.CurrentStage < q.Quest.Stages.Length-1) { continue; }
-                //GLAPModLoader.DebugShowMessage(">>>>we passed a questinstance!!!!");
                 XQuestInstance xq = ExtendedBindingManager.instance.GetExtended<XQuestInstance>(q);
                 if(xq != null)
                 {
-                    //GLAPModLoader.DebugShowMessage(">>>>we are in the matches!!!!");
                     if (xq.Matches(creature)) { return true; }
-                }
-                else
-                {
-
-                    //GLAPModLoader.DebugShowMessage(">>>>it's null.....");
                 }
             }
             return false;
@@ -396,49 +386,43 @@ namespace GhostloreAP
         }
 
     }
-    /*
-    [HarmonyPatch(typeof(QuestManager), nameof(QuestManager.IsLocationUnlocked))]
-    public class IsLocationUnlockedPatcher
-    {
-        static void Postfix(GameLocation location, GameLocationAttributes locationsReached, bool __result, QuestInstance[] ___questInstances)
-        {
-            QuestInstance qi = ___questInstances.FirstOrDefault((QuestInstance c) => c.Quest == location.QuestRequirement);
-            if (qi == null) { return; }
-            var currentStage_ = Traverse.Create(qi).Field("currentStage").GetValue<int>();
-            Quest q = Traverse.Create(qi).Field("quest").GetValue<Quest>();
-            GLAPModLoader.DebugShowMessage("DEBUG UNLOCKS:result=" + __result + "location=" + location.name + "location.QuestRequirement Null?" + (location.QuestRequirement == null) + ",locationsReached=" + ((int)locationsReached) + "locationAttrib=" + ((int)location.Attributes) + ",questInstanceNull?" + (qi == null) + ",questInstance.Active?" + (qi != null && qi.Active) + ",questInstance.Completed?" + (qi != null && qi.Completed) + ",currentStage=" + (currentStage_) + ",stagesLength=" + q.Stages.Length);
-            GLAPModLoader.SaveLog();
-        }
+    
 
-    }
-
-    [HarmonyPatch(typeof(QuestInstance), "CheckGiveQuest")]
-    public class CheckGiveQuestPatcher
-    {
-        static void Postfix(CharacterContainer player, Quest ___quest,QuestInstance __instance)
-        {
-            GLAPModLoader.DebugShowMessage("DEBUG CHECKGIVE:quest=" + ___quest.name + 
-                "0=(" + __instance.CurrentStage + "/"+___quest.Stages.Length+")"+
-                "1=" + ((___quest.Attributes & QuestAttributes.AutoGiven) != QuestAttributes.None) + 
-                "2=" + ((___quest.Attributes & QuestAttributes.Hidden) == QuestAttributes.None) + 
-                "3=" + ___quest.PassedRequirements() + 
-                "4=" + ((___quest.Attributes & QuestAttributes.FirstNewClass) != QuestAttributes.None) + 
-                "5=" + Singleton<PlayerManager>.instance.MeetsLevelRequirement(player.GetCharacterComponent<CharacterExperience>().CurrentLevel, 1)+ "!0 && ((1 && 2 && 3) || (4 && 5))");
-            
-        }
-
-    }
 
     [HarmonyPatch(typeof(QuestInstance), nameof(QuestInstance.CheckProgress))]
     public class CheckProgressPatcher
     {
         static void Postfix(CharacterContainer player,Quest ___quest,ref int ___currentStage)
         {
-            
+            if(___currentStage >= ___quest.Stages.Length && 
+                MapManager.instance.AllLocations.FirstOrDefault((GameLocation gl)=> gl.GameLocationName== "Hellgate Island").QuestRequirement == ___quest)
+            {
+                GLAPClient.instance.CheckWin(GoalType.CompleteStory);
+            }
         }
 
     }
-    */
+
+    [HarmonyPatch(typeof(HellLevelsManager), nameof(HellLevelsManager.LevelComplete))]
+    public class HellLevelCompletePatcher
+    {
+        static void Postfix(HellLevelsManager __instance)
+        {
+            if (__instance.CurrentLevel > 1)
+            {
+                GLAPClient.instance.CheckWin(GoalType.ClearHellGate1);
+            }
+            if (__instance.CurrentLevel > 3)
+            {
+                GLAPClient.instance.CheckWin(GoalType.ClearHellGate3);
+            }
+            if (__instance.CurrentLevel > 10)
+            {
+                GLAPClient.instance.CheckWin(GoalType.ClearHellGate10);
+            }
+        }
+
+    }
 
 
 

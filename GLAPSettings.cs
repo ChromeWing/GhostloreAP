@@ -40,6 +40,8 @@ namespace GhostloreAP
         public static int killQuestsPerMonster = 5; //allowed values: 3-10
         public static int experienceRate = 100;
         public static GoalType goalType = GoalType.CompleteStory;
+        public static bool randomizeSounds = true;
+        public static bool randomizeMusic = true;
 
 
         private static readonly float[] shopPriceBases = new float[]
@@ -84,6 +86,8 @@ namespace GhostloreAP
             baseItemShopCost = Convert.ToInt32(data["base_item_shop_price"]);
             goalType = (GoalType)Convert.ToInt32(data["goal"]);
             deathlink = Convert.ToInt32(data["death_link"]) == 1;
+            randomizeSounds = Convert.ToInt32(data["randomize_sounds"]) == 1;
+            randomizeMusic = Convert.ToInt32(data["randomize_music"]) == 1;
         }
     }
 }
