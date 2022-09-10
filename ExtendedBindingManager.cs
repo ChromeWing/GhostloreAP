@@ -133,7 +133,7 @@ namespace GhostloreAP
     public class XQuestRequirement : ExtendedBinding
     {
         public string locationName;
-        public Creature target;
+        public List<string> target;
         public int killCount = 0;
         public int killRequirement = 10;
 
@@ -146,6 +146,12 @@ namespace GhostloreAP
         public override void Init()
         {
             
+        }
+
+        public void AddTarget(string creature)
+        {
+            if(target == null) { target = new List<string>(); }
+            target.Add(creature);
         }
 
         public void StartListener()
@@ -168,7 +174,7 @@ namespace GhostloreAP
         private void OnCreatureKilled(CharacterContainer character,int count_)
         {
             if (MetRequirement()) { return; }
-            if(target.CreatureName == character.Creature.CreatureName)
+            if (target.Where((c) => { return c == character.Creature.CreatureName; }).Count()>0)
             {
                 killCount+=count_;
                 GLAPNotification.instance.DisplayKillLog(character, killCount, killRequirement);

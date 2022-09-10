@@ -537,6 +537,11 @@ namespace GhostloreAP
             return _session.Locations.AllLocationsChecked.Contains(GetLocationFromName(name_));
         }
 
+        public bool CompletedZenithBossCheck()
+        {
+            return LocationAlreadyChecked(GetLocationFromName("Defeat Zenith"));
+        }
+
         private void DebugLog(string val_)
         {
             GLAPNotification.instance.DisplayLog(val_);

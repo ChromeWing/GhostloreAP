@@ -230,7 +230,7 @@ namespace GhostloreAP
         public void DisplayKillLog(CharacterContainer killed_,int current_,int goal_)
         {
             var creature_ = killed_.Creature;
-            DisplayKillLog(killed_.Creature.CreatureDisplayName,string.Format("Killed {0} ({1}{2})",creature_.CreatureDisplayName,current_,goal_>99999?(" Conquered"):("/"+goal_)));
+            DisplayKillLog(killed_.Creature.CreatureDisplayName(),string.Format("Killed {0} ({1}{2})",creature_.CreatureDisplayName(),current_,goal_>99999?(" Conquered"):("/"+goal_)));
         }
 
         

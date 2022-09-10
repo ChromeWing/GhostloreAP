@@ -80,7 +80,12 @@ namespace GhostloreAP
                     return .5f;
                 case var name when name.ToLower().Contains("spirit orb"):
                     return .3f;
-                
+                case "Spell Tower Fire":
+                    return .5f;
+                case "Aphotic Lurker Hell":
+                    return .8f;
+
+
 
             }
             return 1;
@@ -103,6 +108,8 @@ namespace GhostloreAP
                 case "Hantu Tinggi":
                     return 1;
                 case "Hantu Raya":
+                    return 1;
+                case "Zenith":
                     return 1;
 
             }
@@ -167,7 +174,7 @@ namespace GhostloreAP
             List<Quest> allAPQuests = new List<Quest>();
             foreach(var creature in CreatureCatalogLogger.instance.creatures)
             {
-                allAPQuests.Add(CreateAPQuest(String.Format("AP: {0}", creature.CreatureDisplayName), creature, GLAPSettings.workload));
+                allAPQuests.Add(CreateAPQuest(String.Format("AP: {0}", creature.CreatureDisplayName()), creature, GLAPSettings.workload));
             }
             _quests = allAPQuests;
             return allAPQuests;
@@ -219,7 +226,7 @@ namespace GhostloreAP
         {
             if (i < 0)
             {
-                return ConstructStage(string.Format("Conquered {0}!", creature_.CreatureDisplayName),"", creature_, 9999999);
+                return ConstructStage(string.Format("Conquered {0}!", creature_.CreatureDisplayName()),"", creature_, 9999999);
             }
 
             int requirement_ = GetQuestWorkload(creature_,workload_, i);
@@ -244,8 +251,8 @@ namespace GhostloreAP
             }
 
             return ConstructStage(
-                string.Format("{0} {1} {2}", killText, requirement_, creature_.CreatureDisplayName), 
-                string.Format("{0} {1}", killText, creature_.CreatureDisplayName), 
+                string.Format("{0} {1} {2}", killText, requirement_, creature_.CreatureDisplayName()), 
+                string.Format("{0} {1}", killText, creature_.CreatureDisplayName()), 
                 creature_,
                 requirement_
             );
@@ -262,7 +269,13 @@ namespace GhostloreAP
             ExtendedBindingManager.instance.RegisterAndSet<XQuestRequirement>(r, (xr) =>
             {
                 xr.locationName = locationName_;
-                xr.target = creature_;
+                xr.AddTarget(creature_.CreatureName);
+                if(creature_.CreatureName == "Spell Tower Fire")
+                {
+                    xr.AddTarget("Spell Tower Ice");
+                    xr.AddTarget("Spell Tower Lightning");
+                    xr.AddTarget("Spell Tower Poison");
+                }
                 xr.killRequirement = requirement_;
                 xr.killCount = 0;
                 
@@ -397,10 +410,23 @@ namespace GhostloreAP
             if(___currentStage >= ___quest.Stages.Length && 
                 MapManager.instance.AllLocations.FirstOrDefault((GameLocation gl)=> gl.GameLocationName== "Hellgate Island").QuestRequirement == ___quest)
             {
-                GLAPClient.instance.CheckWin(GoalType.CompleteStory);
+                //GLAPClient.instance.CheckWin(GoalType.CompleteStory);
             }
         }
 
+    }
+
+    [HarmonyPatch(typeof(GoalInteractableObject),nameof(GoalInteractableObject.TryGoal))]
+    public class GoalInteractableObjectPatcher
+    {
+        static void Postfix(GoalInteractableObject __instance,bool __result)
+        {
+            if(__result && GLAPClient.instance.CompletedZenithBossCheck())
+            {
+                GLAPModLoader.DebugShowMessage("did a goal check to win it from: " + __instance.gameObject.name);
+                GLAPClient.instance.CheckWin(GoalType.CompleteStory);
+            }
+        }
     }
 
     [HarmonyPatch(typeof(HellLevelsManager), nameof(HellLevelsManager.LevelComplete))]

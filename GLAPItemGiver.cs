@@ -12,15 +12,15 @@ namespace GhostloreAP
         private bool initialized = false;
 
         private const int minLootId = 10133000;
-        private const int maxLootId = 10133035;
+        private const int maxLootId = 10133038;
 
-        private const int minRecipeId = 10133036;
-        private const int maxRecipeId = 10133055;
+        private const int minRecipeId = 10133039;
+        private const int maxRecipeId = 10133058;
 
-        private const int chthoniteId = 10133056;
-        private const int astraliteId = 10133057;
+        private const int chthoniteId = 10133059;
+        private const int astraliteId = 10133060;
 
-        private const int coinId = 10133058;
+        private const int coinId = 10133061;
 
 
         private Dictionary<int, Creature> creatures;
@@ -119,7 +119,7 @@ namespace GhostloreAP
             {
                 case var i when i >= minLootId && i <= maxLootId:
                     var creature_ = creatures[i];
-                    return string.Format("Loot from {0} showers around you!", creature_.CreatureDisplayName);
+                    return string.Format("Loot from {0} showers around you!", creature_.CreatureDisplayName());
                 case var i when i >= minRecipeId && i <= maxRecipeId:
                     return "You received a new food recipe at the restaurant!";
                 case chthoniteId:
@@ -127,7 +127,7 @@ namespace GhostloreAP
                 case astraliteId:
                     return "An important item Astralite appears in front of you!";
                 case coinId:
-                    return "1000 coins appear in your pockets!";
+                    return "1000 coins shower around you!";
                     
             }
             return "Receieved item that we don't support yet :(";
@@ -142,10 +142,18 @@ namespace GhostloreAP
             ItemManager.instance.SpawnItem(droppedItem_, 1, 1, 0, player.transform.position + Vector3.up * .1f, player.transform.position);
         }
 
-        public void DropCoins(int count_)
+        public async void DropCoins(int count_)
         {
             var player = PlayerManager.instance.GetFirstPlayer();
-            ItemManager.instance.SpawnItem(ItemManager.instance.GetItemFromName("Coins"), count_, 1, 0, player.transform.position + Vector3.up * .1f, player.transform.position);
+            await Task.Yield();
+
+            for (int i = 0; i < 50; i++)
+            {
+                ItemManager.instance.SpawnItem(ItemManager.instance.GetItemFromName("Coins"), count_/50, 1, 0, player.transform.position + Vector3.up * .1f, player.transform.position);
+                await Task.Delay(25);
+            }
+
+            
         }
 
         public async void DropItemsFrom(Creature creature,int count,float maxLevel)

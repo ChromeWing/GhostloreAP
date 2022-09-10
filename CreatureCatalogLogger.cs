@@ -65,13 +65,16 @@ namespace GhostloreAP
             "Vengeful Spirit",
             "Aphotic Lurker",
             "Komodo Wizard Ice",
+            "Aphotic Lurker Hell",
+            "Spell Tower Fire", //the rest are handled in the quest requirement
             "Summoner",
             "Rafflesia",
             "Hantu Raya",
             "Djinn Ice",
             "Djinn Lightning",
             "Djinn",
-            "Hantu Tinggi"
+            "Hantu Tinggi",
+            "Zenith Boss"
         };
 
         public CreatureCatalogLogger()
@@ -96,7 +99,7 @@ namespace GhostloreAP
         {
             CreatureCatalog creatureCatalog = new CreatureCatalog
             {
-                Creatures = (from c in lootableCreatures select (string.Format("{0}|{1}",c.CreatureName,c.CreatureDisplayName))).ToArray()
+                Creatures = (from c in lootableCreatures select (string.Format("{0}|{1}",c.CreatureName,c.CreatureDisplayName()))).ToArray()
             };
             File.WriteAllText(CatalogPath, JsonConvert.SerializeObject(creatureCatalog, Formatting.Indented));
             return creatureCatalog;
@@ -110,7 +113,7 @@ namespace GhostloreAP
 
             foreach (Creature c in monsters.Keys)
             {
-                if (c == null || c.LootTable == null || c.CreatureDisplayName == null || c.CreatureDisplayName.Length == 0)
+                if (c == null || c.LootTable == null || c.CreatureDisplayName() == null || c.CreatureDisplayName().Length == 0)
                 {
                     continue;
                 }
