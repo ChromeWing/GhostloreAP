@@ -158,16 +158,22 @@ namespace GhostloreAP
     {
         static void Postfix(LoadingManager __instance)
         {
-            SaveGame save_ = SaveGame.GetSaveGame();
-            MethodInfo getAllPCs_ = __instance.GetType().GetMethod(
-                "GetAllPCs", 
-                BindingFlags.NonPublic | BindingFlags.Instance,
-                null,
-                CallingConventions.Any,
-                new Type[] { typeof(SaveGame) },
-                null);
-            List<CharacterContainer.Data> data_ = (List < CharacterContainer.Data > )getAllPCs_.Invoke(__instance, new object[] { save_ });
-            GLAPProfileManager.instance.Save(data_.FirstOrDefault().GetSaveGameName());
+            try
+            {
+                SaveGame save_ = SaveGame.GetSaveGame();
+                MethodInfo getAllPCs_ = __instance.GetType().GetMethod(
+                    "GetAllPCs", 
+                    BindingFlags.NonPublic | BindingFlags.Instance,
+                    null,
+                    CallingConventions.Any,
+                    new Type[] { typeof(SaveGame) },
+                    null);
+                List<CharacterContainer.Data> data_ = (List < CharacterContainer.Data > )getAllPCs_.Invoke(__instance, new object[] { save_ });
+                GLAPProfileManager.instance.Save(data_.FirstOrDefault().GetSaveGameName());
+
+            }catch (Exception e)
+            {
+            }
         }
     }
 
