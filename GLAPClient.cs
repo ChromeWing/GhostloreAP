@@ -419,7 +419,7 @@ namespace GhostloreAP
         {
             _session.Locations.CompleteLocationChecksAsync((success) =>
             {
-
+                
             }, GetLocationFromName(locationName_));
 
         }

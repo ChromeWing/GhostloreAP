@@ -109,7 +109,7 @@ namespace GhostloreAP
                     return 1;
                 case "Hantu Raya":
                     return 1;
-                case "Zenith":
+                case "Zenith Boss":
                     return 1;
 
             }
@@ -410,24 +410,13 @@ namespace GhostloreAP
             if(___currentStage >= ___quest.Stages.Length && 
                 MapManager.instance.AllLocations.FirstOrDefault((GameLocation gl)=> gl.GameLocationName== "Hellgate Island").QuestRequirement == ___quest)
             {
-                //GLAPClient.instance.CheckWin(GoalType.CompleteStory);
-            }
-        }
-
-    }
-
-    [HarmonyPatch(typeof(GoalInteractableObject),nameof(GoalInteractableObject.TryGoal))]
-    public class GoalInteractableObjectPatcher
-    {
-        static void Postfix(GoalInteractableObject __instance,bool __result)
-        {
-            if(__result && GLAPClient.instance.CompletedZenithBossCheck())
-            {
-                GLAPModLoader.DebugShowMessage("did a goal check to win it from: " + __instance.gameObject.name);
                 GLAPClient.instance.CheckWin(GoalType.CompleteStory);
             }
         }
+
     }
+
+    
 
     [HarmonyPatch(typeof(HellLevelsManager), nameof(HellLevelsManager.LevelComplete))]
     public class HellLevelCompletePatcher
