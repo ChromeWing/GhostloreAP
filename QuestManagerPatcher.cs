@@ -70,8 +70,10 @@ namespace GhostloreAP
                 //regular monsters:
                 case "Guikia":
                     return 1.5f;
+                case "Ergui":
+                    return .6f;
                 case "Pontianak Tree":
-                    return 0.5f;
+                    return 0.4f;
                 case "Jiang Shi":
                     return 1.5f;
                 case "Stone Guardian":
@@ -108,8 +110,6 @@ namespace GhostloreAP
                 case "Hantu Tinggi":
                     return 1;
                 case "Hantu Raya":
-                    return 1;
-                case "Zenith Boss":
                     return 1;
 
             }

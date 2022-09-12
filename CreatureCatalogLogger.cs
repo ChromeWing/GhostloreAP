@@ -73,8 +73,7 @@ namespace GhostloreAP
             "Djinn Ice",
             "Djinn Lightning",
             "Djinn",
-            "Hantu Tinggi",
-            "Zenith Boss"
+            "Hantu Tinggi"
         };
 
         public CreatureCatalogLogger()

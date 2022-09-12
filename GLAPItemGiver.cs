@@ -12,15 +12,15 @@ namespace GhostloreAP
         private bool initialized = false;
 
         private const int minLootId = 10133000;
-        private const int maxLootId = 10133038;
+        private const int maxLootId = 10133037;
 
-        private const int minRecipeId = 10133039;
-        private const int maxRecipeId = 10133058;
+        private const int minRecipeId = 10133038;
+        private const int maxRecipeId = 10133057;
 
-        private const int chthoniteId = 10133059;
-        private const int astraliteId = 10133060;
+        private const int chthoniteId = 10133058;
+        private const int astraliteId = 10133059;
 
-        private const int coinId = 10133061;
+        private const int coinId = 10133060;
 
 
         private Dictionary<int, Creature> creatures;
