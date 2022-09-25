@@ -25,7 +25,7 @@ namespace GhostloreAP
         {
             binding.SetObj(obj);
             binding.Init();
-            if(bindings.TryGetValue(obj.GetType(), out List<ExtendedBinding> list))
+            if (bindings.TryGetValue(obj.GetType(), out List<ExtendedBinding> list))
             {
                 if (list.Contains(binding))
                 {
@@ -38,12 +38,12 @@ namespace GhostloreAP
             {
                 var newList = new List<ExtendedBinding>();
                 newList.Add(binding);
-                bindings.Add(obj.GetType(), newList);   
+                bindings.Add(obj.GetType(), newList);
             }
             return binding;
         }
 
-        public T RegisterAndSet<T>(System.Object obj,Action<T> setter) where T : ExtendedBinding,new()
+        public T RegisterAndSet<T>(System.Object obj, Action<T> setter) where T : ExtendedBinding, new()
         {
             T binding = new T();
             binding.Set<T>(setter);
@@ -52,12 +52,20 @@ namespace GhostloreAP
 
         public T GetExtended<T>(System.Object obj) where T : ExtendedBinding
         {
-            if(bindings.TryGetValue(obj.GetType(), out List<ExtendedBinding> list))
+            if (bindings.TryGetValue(obj.GetType(), out List<ExtendedBinding> list))
             {
                 return (T)list.Find(x => x.GetRaw() == obj);
             }
 
             return default(T);
+        }
+
+        public void EraseBindingsOfType<T>() where T : ExtendedBinding
+        {
+            if(bindings.TryGetValue(typeof(T), out List<ExtendedBinding> list))
+            {
+                list.Clear();
+            }
         }
 
         public void Cleanup()
