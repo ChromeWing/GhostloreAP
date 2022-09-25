@@ -34,4 +34,31 @@ namespace GhostloreAP
             return item.Item == chthonite || item.Item == astralite;
         }
     }
+
+    //cleanup the XItemInstances if they are wiped clean from the shop!
+    [HarmonyPatch(typeof(ItemManager),nameof(ItemManager.DestroyInventory))]
+    public class DestroyInventoryPatcher
+    {
+        static bool Prefix(int id, Dictionary<int,InventoryData> ___itemsInInventory)
+        {
+            bool foundBracelets = false;
+            if (___itemsInInventory.TryGetValue(id,out InventoryData data_))
+            { 
+                foreach(ItemInstance item in data_.Items)
+                {
+                    var xItem = ExtendedBindingManager.instance.GetExtended<XItemInstance>(item);
+                    if (xItem!=null)
+                    {
+                        foundBracelets = true;
+                        break;
+                    }
+                }
+            }
+            if (foundBracelets)
+            {
+                ExtendedBindingManager.instance.EraseBindingsOfType<XItemInstance>();
+            }
+            return true;
+        }
+    }
 }

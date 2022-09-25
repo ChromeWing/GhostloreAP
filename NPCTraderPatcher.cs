@@ -109,6 +109,8 @@ namespace GhostloreAP
         public void SetupArchipelagoShop(NPCTrader trader)
         {
             if (!GLAPClient.instance.Connected) { return; }
+            //erase the previous XItemInstance bindings, because they have been possibly released into the pool after being freed, and that was causing UI formatting issues!
+            ExtendedBindingManager.instance.EraseBindingsOfType<XItemInstance>();
             var traderCharacter = trader.ParentCharacter;
             System.Random rng_ = new System.Random(GLAPClient.instance.Seed);
             for (int i = 0; i < 20; i++)

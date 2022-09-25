@@ -11,7 +11,8 @@ using System.Reflection;
 /* TODO:
 4h * define an AP world for Ghostlore (almost done)
 
- * remove Zenith boss as a check and item.
+ * watch VoDs to patch fixes to crashes
+ * tune down E-Gui kill count.
 
 1. wait for the final update of Ghostlore so that I can update the location checks (what new monsters there are to do kill quests for)
 2. polish any values for how many monsters to defeat for the specific monster breeds in the kill quests (some monsters appear less often)

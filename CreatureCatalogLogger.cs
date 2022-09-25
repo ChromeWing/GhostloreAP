@@ -65,8 +65,6 @@ namespace GhostloreAP
             "Vengeful Spirit",
             "Aphotic Lurker",
             "Komodo Wizard Ice",
-            "Aphotic Lurker Hell",
-            "Spell Tower Fire", //the rest are handled in the quest requirement
             "Summoner",
             "Rafflesia",
             "Hantu Raya",

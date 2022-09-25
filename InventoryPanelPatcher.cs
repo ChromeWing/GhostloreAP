@@ -31,6 +31,7 @@ namespace GhostloreAP
             bool goingToYourInventory = false;
             foreach(var i in ___player.GetCharacterComponents<Inventory>())
             {
+                if (i == null) { continue; }
                 if (i.ContainsItem(itemInstance))
                 {
                     goingToYourInventory = true;
