@@ -8,15 +8,16 @@ using UnityEngine;
 using FMODUnity;
 using System.Reflection;
 using FMOD.Studio;
+using FMOD;
 
 namespace GhostloreAP
 {
-    [HarmonyPatch(typeof(RuntimeManager),nameof(RuntimeManager.PlayOneShot),typeof(Guid),typeof(Vector3))]
+    [HarmonyPatch(typeof(RuntimeManager),nameof(RuntimeManager.PlayOneShot),typeof(GUID),typeof(Vector3))]
     public class AudioManagerPatcher
     {
-        static bool Prefix(Guid guid, Vector3 position)
+        static bool Prefix(GUID GUID, Vector3 position)
         {
-            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(guid));
+            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(GUID));
             eventInstance.set3DAttributes(position.To3DAttributes());
             eventInstance.start();
             eventInstance.release();
@@ -24,12 +25,12 @@ namespace GhostloreAP
         }
     }
 
-    [HarmonyPatch(typeof(RuntimeManager), nameof(RuntimeManager.PlayOneShotAttached), typeof(Guid), typeof(GameObject))]
+    [HarmonyPatch(typeof(RuntimeManager), nameof(RuntimeManager.PlayOneShotAttached), typeof(GUID), typeof(GameObject))]
     public class AudioManagerPatcher2
     {
-        static bool Prefix(Guid guid, GameObject gameObject)
+        static bool Prefix(GUID GUID, GameObject gameObject)
         {
-            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(guid));
+            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(GUID));
             RuntimeManager.AttachInstanceToGameObject(eventInstance, gameObject.transform, gameObject.GetComponent<Rigidbody>());
             eventInstance.start();
             eventInstance.release();
@@ -40,19 +41,19 @@ namespace GhostloreAP
     [HarmonyPatch(typeof(MapManager),nameof(MapManager.ResetMusic))]
     public class AudioManagerPatcher3
     {
-        static bool Prefix(MapManager __instance,string ___townMusic)
+        static bool Prefix(MapManager __instance,EventReference ___townMusic)
         {
             GameLocation gameLocation = AudioRandomizer.instance.GetMusicLocation(__instance.ActiveLocation.GameLocation);
-            if ((gameLocation.Attributes & GameLocationAttributes.IsTown) != GameLocationAttributes.None && !string.IsNullOrEmpty(___townMusic))
+            if ((gameLocation.Attributes & GameLocationAttributes.IsTown) != GameLocationAttributes.None)
             {
-                Singleton<AudioManager>.instance.SetMusic(new string[]
+                Singleton<AudioManager>.instance.SetMusic(new EventReference[]
                 {
                 ___townMusic,
                 gameLocation.AmbientMusic
                 });
                 return false;
             }
-            Singleton<AudioManager>.instance.SetMusic(new string[]
+            Singleton<AudioManager>.instance.SetMusic(new EventReference[]
             {
             gameLocation.BackgroundMusic,
             gameLocation.AmbientMusic
@@ -69,7 +70,7 @@ namespace GhostloreAP
 
         }
 
-        private Dictionary<Guid, Guid> shuffleSounds;
+        private Dictionary<GUID, GUID> shuffleSounds;
         private Dictionary<GameLocation, GameLocation> shuffleMusicLocations;
 
         private List<string> bannedSounds = new List<string> { //when a sound is banned, it will remain vanilla and not get shuffled.
@@ -85,7 +86,7 @@ namespace GhostloreAP
             RandomizeMusic();
         }
 
-        public Guid GetSound(Guid sound)
+        public GUID GetSound(GUID sound)
         {
             if (!GLAPSettings.randomizeSounds) { return sound; }
             if(!shuffleSounds.ContainsKey(sound)) { return sound; }
@@ -102,8 +103,8 @@ namespace GhostloreAP
         private void RandomizeSounds()
         {
             if (!GLAPSettings.randomizeSounds) { return; }
-            shuffleSounds = new Dictionary<Guid, Guid>();
-            List<Guid> sounds = new List<Guid>();
+            shuffleSounds = new Dictionary<GUID, GUID>();
+            List<GUID> sounds = new List<GUID>();
             Bank[] banklist;
             RuntimeManager.StudioSystem.getBankList(out banklist);
             foreach (Bank bank in banklist)
@@ -128,7 +129,7 @@ namespace GhostloreAP
                     if (doContinue) { continue; }
                     
                     GLAPModLoader.DebugShowMessage("unfiltered sound was:\"" + eventPathName_ + "\"");
-                    Guid id;
+                    GUID id;
                     if (events_[i].getID(out id) == FMOD.RESULT.OK)
                     {
                         if (!sounds.Contains(id))
@@ -138,7 +139,7 @@ namespace GhostloreAP
                     }
                 }
             }
-            List<Guid> unshuffled = new List<Guid>();
+            List<GUID> unshuffled = new List<GUID>();
             for (int i = 0; i < sounds.Count; i++)
             {
                 unshuffled.Add(sounds[i]);
