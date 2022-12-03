@@ -190,8 +190,8 @@ namespace GhostloreAP
             Traverse.Create(defaultLocation).Field("creatures").SetValue(new MapCreatureSpawn[0]);
             Traverse.Create(defaultLocation).Field("defaultPortalPosition").SetValue(Vector3.zero);
             Traverse.Create(defaultLocation).Field("questRequirement").SetValue(null);
-            Traverse.Create(defaultLocation).Field("backgroundMusic").SetValue("");
-            Traverse.Create(defaultLocation).Field("ambientMusic").SetValue("");
+            Traverse.Create(defaultLocation).Field("backgroundMusic").SetValue(AudioRandomizer.GetNullEventReference());
+            Traverse.Create(defaultLocation).Field("ambientMusic").SetValue(AudioRandomizer.GetNullEventReference());
             Traverse.Create(defaultLocation).Field("startingLevel").SetValue(0);
             Traverse.Create(defaultLocation).Field("musicOverrides").SetValue(new GameLocationMusicOverride[0]);
         }

@@ -15,9 +15,9 @@ namespace GhostloreAP
     [HarmonyPatch(typeof(RuntimeManager),nameof(RuntimeManager.PlayOneShot),typeof(GUID),typeof(Vector3))]
     public class AudioManagerPatcher
     {
-        static bool Prefix(GUID GUID, Vector3 position)
+        static bool Prefix(GUID guid, Vector3 position)
         {
-            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(GUID));
+            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(guid));
             eventInstance.set3DAttributes(position.To3DAttributes());
             eventInstance.start();
             eventInstance.release();
@@ -28,9 +28,9 @@ namespace GhostloreAP
     [HarmonyPatch(typeof(RuntimeManager), nameof(RuntimeManager.PlayOneShotAttached), typeof(GUID), typeof(GameObject))]
     public class AudioManagerPatcher2
     {
-        static bool Prefix(GUID GUID, GameObject gameObject)
+        static bool Prefix(GUID guid, GameObject gameObject)
         {
-            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(GUID));
+            EventInstance eventInstance = RuntimeManager.CreateInstance(AudioRandomizer.instance.GetSound(guid));
             RuntimeManager.AttachInstanceToGameObject(eventInstance, gameObject.transform, gameObject.GetComponent<Rigidbody>());
             eventInstance.start();
             eventInstance.release();
@@ -68,6 +68,13 @@ namespace GhostloreAP
         public void Cleanup()
         {
 
+        }
+
+        public static EventReference GetNullEventReference()
+        {
+            var eventRef = new EventReference();
+            eventRef.Guid = new GUID(new Guid(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            return eventRef;
         }
 
         private Dictionary<GUID, GUID> shuffleSounds;
