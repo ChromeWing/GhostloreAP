@@ -73,7 +73,7 @@ namespace GhostloreAP
 
             MethodBase method3_ = typeof(LoadingManager).GetMethod(
                 "LoadGame", 
-                BindingFlags.Instance | BindingFlags.NonPublic, null,
+                BindingFlags.Instance | BindingFlags.Public, null,
                 CallingConventions.Any,
                 new Type[] { typeof(SaveGameSummary) },
                 null);

@@ -10,7 +10,7 @@ namespace GhostloreAP
     [HarmonyPatch(typeof(DeathEffect),nameof(DeathEffect.TriggerDeath))]
     public class DeathEffectPatcher
     {
-        static void Prefix(CharacterContainer defender)
+        static void Prefix(CharacterContainer attacker,CharacterContainer defender)
         {
             if (defender.IsDead) { return; }
             if (defender == PlayerManager.instance.GetFirstPlayer()) { 

@@ -188,9 +188,9 @@ namespace GhostloreAP
 
     public class LoadGamePatcher
     {
-        public static void Postfix(SaveGameSummary summary)
+        public static void Postfix(SaveGameSummary saveSummary)
         {
-            GLAPProfileManager.instance.Load(summary.FileName);
+            GLAPProfileManager.instance.Load(saveSummary.FileName);
         }
 
         public static MethodInfo GetPostfix(System.Action<SaveGameSummary> action)

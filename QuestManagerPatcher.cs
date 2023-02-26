@@ -300,7 +300,9 @@ namespace GhostloreAP
         }
     }
 
-    
+    /*
+     * NOTE: No longer needed since quests appear to be decoupled from game locations when saving/loading 
+     * (this patch was originally meant to fix a bug with the game state being corrupt when saving and reloading in town in Archipelago).
     [HarmonyPatch(typeof(MapManager),nameof(MapManager.GetTown))]
     public class NullQuestLocationPatcher1
     {
@@ -321,6 +323,8 @@ namespace GhostloreAP
 
         }
     }
+
+    */
 
     [HarmonyPatch(typeof(MapManager), nameof(MapManager.IsLocationCompleted))]
     public class NullQuestLocationPatcher2
@@ -418,20 +422,20 @@ namespace GhostloreAP
 
     
 
-    [HarmonyPatch(typeof(HellLevelsManager), nameof(HellLevelsManager.LevelComplete))]
+    [HarmonyPatch(typeof(HellLevelsManager), nameof(HellLevelsManager.DepthCompleted))]
     public class HellLevelCompletePatcher
     {
-        static void Postfix(HellLevelsManager __instance)
+        static void Postfix(int depth)
         {
-            if (__instance.CurrentLevel > 1)
+            if (depth >= 1)
             {
                 GLAPClient.instance.CheckWin(GoalType.ClearHellGate1);
             }
-            if (__instance.CurrentLevel > 3)
+            if (depth >= 3)
             {
                 GLAPClient.instance.CheckWin(GoalType.ClearHellGate3);
             }
-            if (__instance.CurrentLevel > 10)
+            if (depth >= 10)
             {
                 GLAPClient.instance.CheckWin(GoalType.ClearHellGate10);
             }

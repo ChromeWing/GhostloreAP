@@ -43,7 +43,7 @@ namespace GhostloreAP
     {
         static bool Prefix(MapManager __instance,EventReference ___townMusic)
         {
-            GameLocation gameLocation = AudioRandomizer.instance.GetMusicLocation(__instance.ActiveLocation.GameLocation);
+            GameLocation gameLocation = AudioRandomizer.instance.GetMusicLocation(MapManager.ActiveLocation.GameLocation);
             if ((gameLocation.Attributes & GameLocationAttributes.IsTown) != GameLocationAttributes.None)
             {
                 Singleton<AudioManager>.instance.SetMusic(new EventReference[]

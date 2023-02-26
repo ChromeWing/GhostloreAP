@@ -113,6 +113,7 @@ namespace GhostloreAP
             ExtendedBindingManager.instance.EraseBindingsOfType<XItemInstance>();
             var traderCharacter = trader.ParentCharacter;
             System.Random rng_ = new System.Random(GLAPClient.instance.Seed);
+            
             for (int i = 0; i < 20; i++)
             {
                 if (GLAPClient.instance.ShopAlreadyChecked(i)) { continue; }
@@ -139,7 +140,7 @@ namespace GhostloreAP
             ___lastRestockDay = ___lastRestockDay - 1;
             if (___lastRestockDay < 0)
             {
-                ___lastRestockDay = 365;
+                ___lastRestockDay = 300;
             }
             return true;
         }

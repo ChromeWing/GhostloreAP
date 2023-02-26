@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace GhostloreAP
 {
-    [HarmonyPatch(typeof(Chest),nameof(LootSpawn.OnReachedGoal))]
+    [HarmonyPatch(typeof(Chest),nameof(GoalInteractableObject.OnReachedGoal))]
     public class LootSpawnPatcher
     {
         static Item chthonite, astralite;
