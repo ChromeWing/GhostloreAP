@@ -102,6 +102,7 @@ namespace GhostloreAP
             List<Canvas> allCanvas_ = Component.FindObjectsOfType<Canvas>().ToList();
 
             LogDesc(allCanvas_);
+            GLAPModLoader.SaveLog();
             Transform t = null;
             GameObject background_ = null;
             GameObject name_ = null;
@@ -126,7 +127,7 @@ namespace GhostloreAP
                 }
                 if (!cancelButton_)
                 {
-                    cancelButton_ = GetNestedChild(allCanvas_[i].gameObject, "Panels", "New game", "Right side", "Bottom buttons", "cancel");
+                    cancelButton_ = GetNestedChild(allCanvas_[i].gameObject, "Panels", "New game", "Right side", "Bottom buttons", "Back");
                 }
                 if (background_ && name_ && createButton_ && cancelButton_)
                 {
@@ -171,7 +172,7 @@ namespace GhostloreAP
             }
         }
 
-        private static void LogDesc<T>(List<T> objs,int depth_=0) where T : Component
+        private static void LogDesc<T>(List<T> objs,int depth_=0,string path_="") where T : Component
         {
             foreach (Component obj in objs)
             {
@@ -180,13 +181,14 @@ namespace GhostloreAP
                 {
                     indent_ += ">";
                 }
-                Log(indent_+obj.name);
+                string extPath_ = path_ +"/"+ obj.name;
+                Log(extPath_);
                 List<Transform> children = new List<Transform> ();
                 for(int i = 0; i < obj.transform.childCount; i++)
                 {
                     children.Add(obj.transform.GetChild(i));
                 }
-                LogDesc(children,depth_+1);
+                LogDesc(children,depth_+1,extPath_);
             }
         }
 
