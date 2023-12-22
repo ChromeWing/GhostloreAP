@@ -172,10 +172,10 @@ namespace GhostloreAP
                     switch (GLAPSettings.itemLevelType)
                     {
                         case ItemLevelType.TiedToCharacterLevel:
-                            creature.LootTable.TrySpawnLoot(player, player.Level, player.transform.position + Vector3.up * .1f, player.transform.position);
+                            creature.LootTable.TrySpawnLoot(player.Level, player.transform.position + Vector3.up * .1f, player.transform.position, player);
                             break;
                         case ItemLevelType.TiedToProgression:
-                            creature.LootTable.TrySpawnLoot(player, itemLevel, player.transform.position + Vector3.up * .1f, player.transform.position);
+                            creature.LootTable.TrySpawnLoot(itemLevel, player.transform.position + Vector3.up * .1f, player.transform.position, player);
                             break;
                     }
                 }

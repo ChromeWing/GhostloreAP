@@ -29,7 +29,7 @@ namespace GhostloreAP
         static void Postfix(ItemInstance itemInstance, CharacterContainer ___player, ref ItemContextAction contextAction, Inventory ___inventoryTarget)
         {
             bool goingToYourInventory = false;
-            foreach(var i in ___player.GetCharacterComponents<Inventory>())
+            foreach(var i in ___player.Inventories)
             {
                 if (i == null) { continue; }
                 if (i.ContainsItem(itemInstance))

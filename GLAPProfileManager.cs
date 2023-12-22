@@ -160,7 +160,7 @@ namespace GhostloreAP
         {
             try
             {
-                SaveGame save_ = SaveGame.GetSaveGame();
+                SaveGame save_ = SaveGame.GetSaveGame(false);
                 MethodInfo getAllPCs_ = __instance.GetType().GetMethod(
                     "GetAllPCs", 
                     BindingFlags.NonPublic | BindingFlags.Instance,

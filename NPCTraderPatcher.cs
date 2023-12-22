@@ -37,7 +37,8 @@ namespace GhostloreAP
         public List<Item> archipelagoShopItems { get; private set; }
 
         public string[] shopItemNames;
-
+        private int inventoryID;
+        private Vector2Int positionInInventory;
         public static readonly string BRACELET_DESCRIPTION = "A strange bracelet that seems to link items between worlds...";
 
         
@@ -71,7 +72,7 @@ namespace GhostloreAP
         }
 
 
-        public void AddItemToInventory(int slot,string name, string description, int cost, Item item,CharacterContainer character)
+        public void AddItemToInventory(int slot,string name, string description, int cost, Item item,Inventory character)
         {
             ItemInstance itemInstance = Singleton<ItemManager>.instance.SpawnItem(item, 1, 1, 0f, character.transform.position, character.transform.position);
 
@@ -102,7 +103,7 @@ namespace GhostloreAP
                 s.cost = cost;
                 s.AP_ShopSlot = slot;
             });
-            itemInstance.PickupOffGround(character);
+            itemInstance.AddItemToInventory(inventoryID, positionInInventory);
         }
 
 
@@ -111,7 +112,7 @@ namespace GhostloreAP
             if (!GLAPClient.instance.Connected) { return; }
             //erase the previous XItemInstance bindings, because they have been possibly released into the pool after being freed, and that was causing UI formatting issues!
             ExtendedBindingManager.instance.EraseBindingsOfType<XItemInstance>();
-            var traderCharacter = trader.ParentCharacter;
+            var traderCharacter = trader.Inventory;
             System.Random rng_ = new System.Random(GLAPClient.instance.Seed);
             
             for (int i = 0; i < 20; i++)

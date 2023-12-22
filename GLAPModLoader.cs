@@ -170,7 +170,7 @@ namespace GhostloreAP
             {
                 await Task.Yield();
             }
-            SaveGame.GetSaveGame().Managers.Find((m) => { return m.GetType() == typeof(QuestManager.Data); }).Deserialize();
+            SaveGame.GetSaveGame(false).Managers.Find((m) => { return m.GetType() == typeof(QuestManager.Data); }).Deserialize();
             QuestFactory.instance.FixAfterAwake();
         }
 
